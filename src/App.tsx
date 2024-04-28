@@ -17,16 +17,19 @@ import { ConfigProvider, App as AntdApp } from "antd";
 import "@refinedev/antd/dist/reset.css";
 
 import {
-  BlogPostList,
-  BlogPostCreate,
-  BlogPostEdit,
-  BlogPostShow,
-} from "./pages/blog-posts";
-import { CategoryList, CategoryCreate, CategoryEdit } from "./pages/categories";
+  DocumentList,
+  // DocumentCreate,
+  // DocumentEdit,
+  DocumentShow,
+} from "./pages/documents";
 
-const API_TOKEN =
-  "patI3quNRP17TNsjK.d59600d5955939ed02110fb1107036ff4482496004f020f5bf031f55789cd321";
-const BASE_ID = "appKYl1H4k9g73sBT";
+const API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN || "default_token";
+const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID || "default_base_id";
+
+if (!import.meta.env.VITE_AIRTABLE_API_TOKEN || !import.meta.env.VITE_AIRTABLE_BASE_ID) {
+    console.error("API token or Base ID is undefined.");
+}
+
 
 const App: React.FC = () => {
   return (
@@ -39,21 +42,12 @@ const App: React.FC = () => {
             routerProvider={routerProvider}
             resources={[
               {
-                name: "blog_posts",
-                list: "/blog-posts",
-                create: "/blog-posts/new",
-                edit: "/blog-posts/:id/edit",
-                show: "/blog-posts/:id",
-              },
-              {
-                name: "categories",
-                list: "/categories",
-                create: "/categories/new",
-                edit: "/categories/:id/edit",
-                meta: {
-                  canDelete: true,
-                },
-              },
+                name: "documents",
+                list: "/documents",
+                // create: "/documents/new",
+                // edit: "/documents/:id/edit",
+                show: "/documents/:id",
+              }
             ]}
             notificationProvider={useNotificationProvider}
             options={{
@@ -71,21 +65,17 @@ const App: React.FC = () => {
               >
                 <Route
                   index
-                  element={<NavigateToResource resource="blog_posts" />}
+                  element={<NavigateToResource resource="documents" />}
                 />
 
-                <Route path="/blog-posts">
-                  <Route index element={<BlogPostList />} />
-                  <Route path="new" element={<BlogPostCreate />} />
-                  <Route path=":id/edit" element={<BlogPostEdit />} />
-                  <Route path=":id" element={<BlogPostShow />} />
+                <Route path="/documents">
+                  <Route index element={<DocumentList />} />
+                  {/* <Route path="new" element={<DocumentCreate />} /> If you have a create view */}
+                  {/* <Route path=":id/edit" element={<DocumentEdit />} /> If you have an edit view */}
+                  <Route path=":id" element={<DocumentShow />} /> {/* If you have a show view */}
                 </Route>
 
-                <Route path="/categories">
-                  <Route index element={<CategoryList />} />
-                  <Route path="new" element={<CategoryCreate />} />
-                  <Route path=":id/edit" element={<CategoryEdit />} />
-                </Route>
+
 
                 <Route path="*" element={<ErrorComponent />} />
               </Route>

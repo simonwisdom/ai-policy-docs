@@ -12,6 +12,17 @@ export interface IPost {
   image: IImage[];
 }
 
+export interface IDocument {
+  id: string;
+  abstract: string;
+  action: string;
+  agencies: string; // If agencies is an array of strings, use string[]
+  agency_names: string; // Similarly, use string[] if this is an array
+  body_html_url: string;
+  // ... include other document fields here as properties of the interface
+  // Ensure the types match what you expect (e.g., string, number, boolean, string[], etc.)
+}
+
 interface IImage {
   id: string;
   filename: string;
