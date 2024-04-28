@@ -1,0 +1,44 @@
+{
+  "name": "data-provider-airtable",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc && refine build",
+    "dev": "refine dev",
+    "preview": "refine start",
+    "refine": "refine"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@refinedev/airtable": "^4.4.7",
+    "@refinedev/antd": "^5.37.6",
+    "@refinedev/cli": "^2.16.29",
+    "@refinedev/core": "^4.49.0",
+    "@refinedev/react-router-v6": "^4.5.7",
+    "@uiw/react-md-editor": "^3.19.5",
+    "antd": "^5.0.5",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.4.2",
+    "vite": "^5.1.6"
+  }
+}
