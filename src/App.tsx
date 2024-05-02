@@ -1,4 +1,4 @@
-import { GitHubBanner, Refine } from "@refinedev/core";
+import { Refine } from "@refinedev/core";
 import {
   useNotificationProvider,
   ThemedLayoutV2,
@@ -12,29 +12,30 @@ import routerProvider, {
   DocumentTitleHandler,
 } from "@refinedev/react-router-v6";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-
-import { ConfigProvider, App as AntdApp } from "antd";
+import { ConfigProvider, App as AntdApp, Layout } from "antd";
 import "@refinedev/antd/dist/reset.css";
-
-import {
-  DocumentList,
-  // DocumentCreate,
-  // DocumentEdit,
-  DocumentShow,
-} from "./pages/documents";
+import { DocumentList, DocumentShow } from "./pages/documents";
 
 const API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN || "default_token";
 const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID || "default_base_id";
 
 if (!import.meta.env.VITE_AIRTABLE_API_TOKEN || !import.meta.env.VITE_AIRTABLE_BASE_ID) {
-    console.error("API token or Base ID is undefined.");
+  console.error("API token or Base ID is undefined.");
 }
 
+const { Content } = Layout;
+
+const CustomLayout = () => (
+  <Layout style={{ minHeight: "100vh" }}>
+    <Content>
+      <Outlet />
+    </Content>
+  </Layout>
+);
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <GitHubBanner />
       <ConfigProvider theme={RefineThemes.Blue}>
         <AntdApp>
           <Refine
@@ -42,12 +43,10 @@ const App: React.FC = () => {
             routerProvider={routerProvider}
             resources={[
               {
-                name: "documents",
-                list: "/documents",
-                // create: "/documents/new",
-                // edit: "/documents/:id/edit",
-                show: "/documents/:id",
-              }
+                name: "ai_documents",
+                list: "/",
+                show: "/:id",
+              },
             ]}
             notificationProvider={useNotificationProvider}
             options={{
@@ -56,27 +55,9 @@ const App: React.FC = () => {
             }}
           >
             <Routes>
-              <Route
-                element={
-                  <ThemedLayoutV2>
-                    <Outlet />
-                  </ThemedLayoutV2>
-                }
-              >
-                <Route
-                  index
-                  element={<NavigateToResource resource="documents" />}
-                />
-
-                <Route path="/documents">
-                  <Route index element={<DocumentList />} />
-                  {/* <Route path="new" element={<DocumentCreate />} /> If you have a create view */}
-                  {/* <Route path=":id/edit" element={<DocumentEdit />} /> If you have an edit view */}
-                  <Route path=":id" element={<DocumentShow />} /> {/* If you have a show view */}
-                </Route>
-
-
-
+              <Route element={<CustomLayout />}>
+                <Route index element={<DocumentList />} />
+                <Route path="/:id" element={<DocumentShow />} />
                 <Route path="*" element={<ErrorComponent />} />
               </Route>
             </Routes>

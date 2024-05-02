@@ -13,14 +13,19 @@ export interface IPost {
 }
 
 export interface IDocument {
-  id: string;
-  abstract: string;
-  action: string;
-  agencies: string; // If agencies is an array of strings, use string[]
-  agency_names: string; // Similarly, use string[] if this is an array
-  body_html_url: string;
-  // ... include other document fields here as properties of the interface
-  // Ensure the types match what you expect (e.g., string, number, boolean, string[], etc.)
+  id: string;  // assuming an 'id' is used as the unique identifier and row key
+  type: string;
+  publication_date: string;
+  document_number: string;
+  agency_names: string;
+  llm_summary: string;
+  llm_summary_full: string;
+  dates: string;  // Assuming dates are represented as a string
+  docket_id: string;
+  page_views: number;  // Assuming page views are stored as a number
+  raw_text_url: string;
+  comments_url: string;
+  comments_count: number;  // Assuming comments count is a number
 }
 
 interface IImage {

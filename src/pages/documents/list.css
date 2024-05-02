@@ -1,9 +1,76 @@
 /* list.css */
 
-.custom-table .ant-table-cell {
-    min-width: 150px; /* Set the minimum width for all cells */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.custom-table .ant-table {
+    font-size: 14px;
+    border-collapse: separate;
+    border-spacing: 0 8px;
   }
   
+  .custom-table .ant-table-thead > tr > th {
+    background-color: #f0f2f5;
+    color: #333;
+    font-weight: bold;
+    border-bottom: none;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  
+  .custom-table .ant-table-tbody > tr > td {
+    background-color: #fff;
+    border-bottom: none;
+    padding: 12px 16px;
+  }
+
+  .custom-table .ant-table-tbody > tr:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+  
+  .custom-table .ant-table-tbody > tr:hover > td {
+    background-color: #f5f5f5;
+  }
+  
+  .custom-table .ant-table-cell {
+    min-width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    padding: 12px;
+  }
+  
+  .custom-table .type-tag {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  
+  .custom-table .type-tag.rule {
+    background-color: #1890ff;
+    color: #fff;
+  }
+  
+  .custom-table .type-tag.proposed-rule {
+    background-color: #52c41a;
+    color: #fff;
+  }
+  
+  .custom-table .type-tag.notice {
+    background-color: #faad14;
+    color: #fff;
+  }
+  
+  .custom-table .type-tag.presidential-document {
+    background-color: #f5222d;
+    color: #fff;
+  }
+
+  .filter-tags {
+    margin-bottom: 16px;
+  }
+
+  .filter-tags .ant-tag {
+    cursor: pointer;
+    margin-right: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+  }
