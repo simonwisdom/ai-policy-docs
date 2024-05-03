@@ -23,8 +23,9 @@ export interface IDocument {
   dates: string;  // Assuming dates are represented as a string
   docket_id: string;
   page_views: number;  // Assuming page views are stored as a number
-  raw_text_url: string;
-  comments_url: string;
+  html_url: string;
+  comment_url: string;
+  comments_close_on: string;
   comments_count: number;  // Assuming comments count is a number
 }
 
