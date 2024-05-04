@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "refine start",
     "build": "tsc && refine build",
     "dev": "refine dev",
     "preview": "refine start",
