@@ -22,3 +22,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/src/components/ExpandableTextModal.tsx
+/src/pages/documents/list old.tsx
