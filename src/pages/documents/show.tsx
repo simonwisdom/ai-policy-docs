@@ -16,28 +16,11 @@ export const DocumentShow = () => {
       <Title level={5}>Id</Title>
       <Text>{record?.id}</Text>
 
-      {/* Assuming you have an 'abstract' field */}
       <Title level={5}>Abstract</Title>
       <TextField value={record?.abstract} />
 
-      {/* Repeat for each relevant field in your document schema */}
-      <Title level={5}>Action</Title>
-      <TextField value={record?.action} />
-
-      <Title level={5}>Agencies</Title>
-      <TextField value={record?.agencies} />
-
       <Title level={5}>Agency Names</Title>
       <TextField value={record?.agency_names} />
-
-      {/* If body_html_url is a URL, you might want to display it as a link */}
-      <Title level={5}>Document</Title>
-      <Text>
-        <a href={record?.body_html_url} target="_blank" rel="noopener noreferrer">
-          View Document
-        </a>
-      </Text>
-      {/* ... other fields ... */}
     </Show>
   );
 };

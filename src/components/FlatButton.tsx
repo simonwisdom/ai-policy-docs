@@ -1,8 +1,15 @@
-// components/FlatButton.jsx
+// components/FlatButton.tsx
 
 import React from 'react';
 
-const FlatButton = ({ onClick, children, color = '#007BFF' }) => {
+interface FlatButtonProps {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  children: React.ReactNode;
+  color?: string; // Keep the color prop optional
+}
+
+
+const FlatButton = ({ onClick, children, color = '#007BFF' }: FlatButtonProps) => {
   const style = {
     padding: '4px 8px',
     border: `1px solid ${color}`,
