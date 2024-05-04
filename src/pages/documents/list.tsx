@@ -77,7 +77,7 @@ export const DocumentList: React.FC = () => {
       ellipsis: true,
       render: (title: string) => {
         // Logic to find the first punctuation
-        const firstPunctuationIndex = title.search(/[,;.]/);
+        const firstPunctuationIndex = title.search(/[,;]/);
         let truncatedTitle = title;
         if (firstPunctuationIndex !== -1) {
           truncatedTitle = title.substring(0, firstPunctuationIndex + 1) + '...';
