@@ -29,23 +29,31 @@ const TextContainer = styled.div`
 
 // TypeScript interface for component props
 interface ExpandableTextProps {
-  text: string;
-  maxWidth?: number;
+    content: string; // The prop to hold the text content
+    children?: string | React.ReactNode; 
+    text?: string;  // Keep the old 'text' prop optional for compatibility
+    maxWidth?: number;
+    title: string; 
+    maxLength: number; 
 }
 
 const ExpandableText: React.FC<ExpandableTextProps> = ({
-  text,
-  maxWidth = 200 // Default value for maxWidth
-}) => (
-  <CustomTooltip 
-    title={<Markdown>{text}</Markdown>}
-    placement="topLeft"
-    overlayStyle={{ maxWidth: '400px' }} // Tooltip content max width
-  >
-    <TextContainer style={{ maxWidth: `${maxWidth}px` }}>
-      {text}
-    </TextContainer>
-  </CustomTooltip>
-);
+    children,
+    content,
+    text,
+    maxWidth = 300,
+    title,
+  }) => (
+    <CustomTooltip
+      title={<Markdown>{title}</Markdown>}
+      placement="topLeft"
+      overlayStyle={{ maxWidth: '400px' }}
+    >
+      <TextContainer style={{ maxWidth: `${maxWidth}px` }}>
+        {children || content || text}
+      </TextContainer>
+    </CustomTooltip>
+  );
+  
 
 export default ExpandableText;

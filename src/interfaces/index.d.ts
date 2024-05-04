@@ -27,6 +27,9 @@ export interface IDocument {
   comment_url: string;
   comments_close_on: string;
   comments_count: number;  // Assuming comments count is a number
+  abstract: string;
+  regulations_dot_gov_comments_url: string;
+  effective_on: string;
 }
 
 interface IImage {

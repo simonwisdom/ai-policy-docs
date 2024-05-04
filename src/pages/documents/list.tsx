@@ -1,28 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Tag } from "antd";
-import { useTable } from "@refinedev/antd";
-import { IDocument } from "../../interfaces";
+import { Table, Tag, Button } from 'antd';
+import { ColumnsType } from 'antd/es/table';
+import { useTable } from '@refinedev/antd';
+import { IDocument } from '../../interfaces';
 import ExpandableText from '../../components/ExpandableText';
 import FlatButton from '../../components/FlatButton';
-import "./list.css";
+import './list.css';
 
-const FILTER_TAGS = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document', 'Open Comments'];
+const FILTER_TAGS: string[] = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document', 'Open Comments'];
 
-export const DocumentList = () => {
+export const DocumentList: React.FC = () => {
   const [activeTypeFilter, setActiveTypeFilter] = useState<string | null>(null);
   const { tableProps, setFilters } = useTable<IDocument>({
     initialPageSize: 10,
   });
-  const [tableKey, setTableKey] = useState(0);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = (): void => {
     setActiveTypeFilter(null);
-    setFilters([]);
-    setTableKey(prevKey => prevKey + 1); // Increment key to force re-render
+    setFilters([], "replace");  // Use replace behavior to clear all filters
     console.log("Filters cleared"); // Debugging output
   };
 
-  const handleFilterChange = (type: string | null) => {
+  const handleFilterChange = (type: string | null): void => {
     setActiveTypeFilter(type);
     if (type === 'Open Comments') {
       const currentDate = new Date();
@@ -43,26 +42,23 @@ export const DocumentList = () => {
     console.log("Filter set for:", type); // Debugging output
   };
 
+  const expandedRowRender = (record: IDocument): JSX.Element => {
+    return (
+      <div>
+        {record.document_number && <p><strong>Document Number:</strong> {record.document_number}</p>}
+        {record.abstract && <p><strong>Abstract:</strong> {record.abstract}</p>}
+        {record.llm_summary && <p><strong>LLM Summary:</strong> {record.llm_summary}</p>}
+        {record.llm_summary_full && <p><strong>LLM Summary Full:</strong> {record.llm_summary_full}</p>}
+        {record.dates && <p><strong>Dates:</strong> {record.dates}</p>}
+        {record.html_url && <p><strong>Federal Register Link:</strong> <a href={record.html_url} target="_blank" rel="noopener noreferrer">View official release</a></p>}
+        {record.regulations_dot_gov_comments_url && <p><strong>Regulations.gov Link:</strong> <a href={record.regulations_dot_gov_comments_url} target="_blank" rel="noopener noreferrer">Document details</a></p>}
+        {record.effective_on && <p><strong>Effective On:</strong> {record.effective_on}</p>}
+      </div>
+    );
+  };
   
 
-  const columns = useMemo(() => [
-    // {
-    //   title: '',
-    //   dataIndex: 'comments_close_on',
-    //   key: 'row_highlight',
-    //   render: (text: string, record: IDocument) => {
-    //     const currentDate = new Date();
-    //     const commentsCloseOn = new Date(record.comments_close_on);
-    //     return commentsCloseOn > currentDate ? 'open-comments' : '';
-    //   },
-    // },
-    {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
-      width: 300, // Set a minimum width
-      ellipsis: true, // Handle text overflow
-    },
+  const columns: ColumnsType<IDocument> = useMemo(() => [
     {
       title: 'Type',
       dataIndex: 'type',
@@ -74,6 +70,29 @@ export const DocumentList = () => {
       ),
     },
     {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+      width: 300,
+      ellipsis: true,
+      render: (title: string) => {
+        // Logic to find the first punctuation
+        const firstPunctuationIndex = title.search(/[,;.]/);
+        let truncatedTitle = title;
+        if (firstPunctuationIndex !== -1) {
+          truncatedTitle = title.substring(0, firstPunctuationIndex + 1) + '...';
+        }
+        return (
+          <ExpandableText content={truncatedTitle} title={title} maxLength={40} />
+        );
+      },
+    },
+      {
+        title: 'Agency Names',
+        dataIndex: 'agency_names',
+        key: 'agency_names',
+    },
+    {
       title: 'Publication Date',
       dataIndex: 'publication_date',
       key: 'publication_date',
@@ -81,65 +100,17 @@ export const DocumentList = () => {
       sorter: (a: IDocument, b: IDocument) => new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime(),
     },
     {
-      title: 'Document Number',
-      dataIndex: 'document_number',
-      key: 'document_number',
-    },
-    // {
-    //   title: 'Docket ID',
-    //   dataIndex: 'docket_id',
-    //   key: 'docket_id',
-    // },
-    {
-      title: 'Agency Names',
-      dataIndex: 'agency_names',
-      key: 'agency_names',
-    },
-    {
-      title: 'Abstract',
-      dataIndex: 'abstract',
-      key: 'abstract',
-      render: (text: string) => <ExpandableText text={text} />,
-    },
-    {
       title: 'LLM Summary',
       dataIndex: 'llm_summary',
       key: 'llm_summary',
-      render: (text: string) => <ExpandableText text={text} />,
-    },
-    {
-      title: 'LLM Summary Full',
-      dataIndex: 'llm_summary_full',
-      key: 'llm_summary_full',
-      render: (text: string) => <ExpandableText text={text} />,
-    },
-    {
-      title: 'Dates',
-      dataIndex: 'dates',
-      key: 'dates',
-      render: (text: string) => <ExpandableText text={text} />,
-    },
-    // {
-    //   title: 'Page Views',
-    //   dataIndex: 'page_views',
-    //   key: 'page_views',
-    // },
-    {
-      title: 'Federal Register Link',
-      dataIndex: 'html_url',
-      key: 'html_url',
-      render: (text: string) => text ? <a href={text} target="_blank" rel="noopener noreferrer">View official release</a> : null,
-    },
-    {
-      title: 'Regulations.gov Link',
-      dataIndex: 'regulations_dot_gov_comments_url',
-      key: 'regulations_dot_gov_comments_url',
-      render: (text: string) => text ? <a href={text} target="_blank" rel="noopener noreferrer">Document details</a> : null,
-    },
-    {
-      title: 'Effective On',
-      dataIndex: 'effective_on',
-      key: 'effective_on',
+      width: 300,
+      render: (text: string): JSX.Element => {
+        return (
+            <ExpandableText content={text} maxLength={30} title={text}> 
+                {text} 
+            </ExpandableText>
+        );
+      },
     },
     {
       title: 'Comments Close On',
@@ -173,18 +144,12 @@ export const DocumentList = () => {
         );
       },
     },
-    
-    // {
-    //   title: 'Comments Count',
-    //   dataIndex: 'comments_count',
-    //   key: 'comments_count',
-    // },
   ], []);
 
   return (
     <div>
       <div className="filter-tags">
-        {FILTER_TAGS.map(type => (
+        {FILTER_TAGS.map((type: string) => (
           <Tag
             color={activeTypeFilter === type ? 'blue' : 'default'}
             onClick={() => handleFilterChange(type)} 
@@ -193,27 +158,24 @@ export const DocumentList = () => {
             {type}
           </Tag>
         ))}
-        <Tag
-          onClick={handleClearFilters}
-          color={activeTypeFilter ? 'blue' : 'default'} // Highlight if filter is active
-        >
+        <Tag onClick={handleClearFilters}>
           Clear Filter
         </Tag>
+        <div style={{ marginBottom: 20 }}>
+          Total Documents: {tableProps.dataSource?.length || 0}
+        </div>
       </div>
       <Table
-        key={tableKey}
         {...tableProps}
         rowKey="id"
         columns={columns}
+        expandedRowRender={expandedRowRender}
         bordered
         className="custom-table"
         scroll={{ x: '100%', y: 'calc(100vh - 250px)' }}
-        rowClassName={(record: IDocument) => {
-          const currentDate = new Date();
-          const commentsCloseOn = new Date(record.comments_close_on);
-          return commentsCloseOn > currentDate ? 'open-comments' : '';
-        }}
       />
     </div>
   );
 };
+
+export default DocumentList;
