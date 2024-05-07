@@ -24,7 +24,7 @@ const TextContainer = styled.div`
   cursor: pointer;
   max-height: 54px; // Height enough for three lines
   line-height: 18px;
-  max-width: 200px; // Adjust based on your layout needs
+  max-width: 400px; // Adjust based on your layout needs
 `;
 
 // TypeScript interface for component props
@@ -41,7 +41,7 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
     children,
     content,
     text,
-    maxWidth = 300,
+    maxWidth = 400,
     title,
   }) => (
     <CustomTooltip

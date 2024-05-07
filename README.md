@@ -1,43 +1,27 @@
-<div align="center" style="margin: 30px;">
-<a href="https://refine.dev/">
-  <img alt="refine logo" src="https://refine.ams3.cdn.digitaloceanspaces.com/readme/refine-readme-banner.png">
-</a>
+# AI Policy Docs
 
-</br>
-</br>
+AI Policy Docs is a project aimed at monitoring and analyzing federal rulemaking related to artificial intelligence (AI) and its potential impact on AI extinction risk. The project aggregates and filters relevant documents from various government sources, including federalregister.gov, reginfo.gov, regulations.gov, and congress.gov.
 
-<div align="center">
-    <a href="https://refine.dev">Home Page</a> |
-    <a href="https://discord.gg/refine">Discord</a> |
-    <a href="https://refine.dev/examples/">Examples</a> |
-    <a href="https://refine.dev/blog/">Blog</a> |
-    <a href="https://refine.dev/docs/">Documentation</a>
-</div>
-</div>
+## Project Goals
 
-</br>
-</br>
+- Identify and track proposed rules and public comment periods relevant to AI governance.
+- Gain insights into the types of rules being proposed and determine specific goals to pursue.
 
-<div align="center"><strong>Build your <a href="https://reactjs.org/">React</a>-based CRUD applications, without constraints.</strong><br>An open source, headless web application framework developed with flexibility in mind.
+## Current Features
 
-<br />
-<br />
+- Backend service that aggregates and filters AI governance-related documents from federal sources.
+- Frontend interface for browsing, searching, and filtering documents.
+- List of documents currently open for public comment.
 
-[![Discord](https://img.shields.io/discord/837692625737613362.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/refine)
-[![Twitter Follow](https://img.shields.io/twitter/follow/refine_dev?style=social)](https://twitter.com/refine_dev)
+## Planned Features
+- Analysis of comments on closed documents, including submitting organizations and sentiment analysis.
+- Display of comments on relevant AI documents. 
+- Email subscription or RSS feed for updates on new relevant documents.
 
-<a href="https://www.producthunt.com/posts/refine-3?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-refine&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=362220&theme=light&period=daily" alt="refine - 100&#0037;&#0032;open&#0032;source&#0032;React&#0032;framework&#0032;to&#0032;build&#0032;web&#0032;apps&#0032;3x&#0032;faster | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+## Getting Started
 
-</div>
+Visit the site at [aipolicydocs.org](https://aipolicydocs.org)
 
-## Try this example on your local
+## License
 
-```bash
-npm create refine-app@latest -- --example data-provider-airtable
-```
-
-## Try this example on CodeSandbox
-
-<br/>
-
-[![Open data-provider-airtable example from refine](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/embed/github/refinedev/refine/tree/master/examples/data-provider-airtable?view=preview&theme=dark&codemirror=1)
+This project is licensed under the [MIT License](LICENSE).
