@@ -4,7 +4,6 @@ import { ColumnsType } from 'antd/es/table';
 import { useTable } from '@refinedev/antd';
 import { IDocument } from '../../interfaces';
 import './list.css';
-// import FilterTags from '../../components/FilterTags';
 import ExpandedRowContent from '../../components/ExpandedRowContent';
 import { getColumns } from './columnsConfig';
 import { handleAgencyFilterChange } from './utils';
