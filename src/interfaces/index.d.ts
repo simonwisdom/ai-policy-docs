@@ -13,23 +13,26 @@ export interface IPost {
 }
 
 export interface IDocument {
-  id: string;  // assuming an 'id' is used as the unique identifier and row key
+  id: string;
   type: string;
   publication_date: string;
   document_number: string;
   agency_names: string;
   llm_summary: string;
   llm_summary_full: string;
-  dates: string;  // Assuming dates are represented as a string
+  dates: string;
   docket_id: string;
-  page_views: number;  // Assuming page views are stored as a number
+  page_views: number;
   html_url: string;
   comment_url: string;
   comments_close_on: string;
-  comments_count: number;  // Assuming comments count is a number
+  comments_count: number;
   abstract: string;
   regulations_dot_gov_comments_url: string;
   effective_on: string;
+  tags: string[];
+  title: string;
+  page_views_count: number; 
 }
 
 interface IImage {

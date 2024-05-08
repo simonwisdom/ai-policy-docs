@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Table, Tag, Button } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { useTable } from '@refinedev/antd';
@@ -12,28 +12,50 @@ const FILTER_TAGS: string[] = ['Rule', 'Proposed Rule', 'Notice', 'Presidential 
 
 export const DocumentList: React.FC = () => {
   const [activeTypeFilter, setActiveTypeFilter] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string>('');
   const [selectedAgency, setSelectedAgency] = useState<string | null>(null);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const [current, setCurrent] = useState(1);  // Current page state
+  const pageSizeRef = useRef(10); // Reference for page size
 
   const { tableProps, setFilters } = useTable<IDocument>({
-    initialPageSize: 10,
+    initialPageSize: pageSizeRef.current,
   });
+
+  const expandRow = (rowKey: React.Key) => {
+    if (expandedRowKeys.includes(rowKey)) {
+      setExpandedRowKeys(expandedRowKeys.filter((key) => key !== rowKey));
+    } else {
+      setExpandedRowKeys([...expandedRowKeys, rowKey]);
+    }
+  };
 
   const handleAgencyFilterChange = (agency: string): void => {
     setSelectedAgency(agency);
-    setFilters([
-      {
-        field: 'agency_names',
-        operator: 'contains',
-        value: agency,
-      },
-    ]);
+    setCurrent(1); // Reset to the first page on agency change
+
+    const filterConfig = {
+      field: 'agency_names',
+      operator: 'contains',
+      value: agency,
+    };
+
+    const settings = {
+      filters: [filterConfig],
+      pagination: {
+        current: 1,
+        pageSize: pageSizeRef.current,  // Use the current page size
+      }
+    };
+
+    setFilters(settings as any);
   };
+  
 
   const handleClearFilters = (): void => {
     setActiveTypeFilter(null);
     setSelectedAgency(null);
-    setFilters([], "replace"); // Use replace behavior to clear all filters
-    console.log("Filters cleared"); // Debugging output
+    setFilters([], "replace");
   };
 
   const handleFilterChange = (type: string | null): void => {
@@ -57,8 +79,7 @@ export const DocumentList: React.FC = () => {
     console.log("Filter set for:", type); // Debugging output
   };
 
-// list.tsx
-const columns = useMemo(() => getColumns(setSelectedAgency, setFilters), [setSelectedAgency, setFilters]);
+  const columns = getColumns(setSelectedAgency, setSelectedTag, setFilters, expandRow, expandedRowKeys);
 
   return (
     <div>
@@ -88,11 +109,31 @@ const columns = useMemo(() => getColumns(setSelectedAgency, setFilters), [setSel
         {...tableProps}
         rowKey="id"
         columns={columns}
-        expandedRowRender={(record: IDocument) => <ExpandedRowContent record={record} />}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: event => { // Toggle expand on row click instead of using a separate column
+              const currentExpandedRows = [...expandedRowKeys];
+              const recordId = record.id.toString();
+              const currentIndex = currentExpandedRows.indexOf(recordId);
+              if (currentIndex === -1) {
+                setExpandedRowKeys([...currentExpandedRows, recordId]);
+              } else {
+                setExpandedRowKeys(currentExpandedRows.filter(id => id !== recordId));
+              }
+            },
+          };
+        }}
+        expandable={{
+          expandedRowRender: (record: IDocument) => <ExpandedRowContent record={record} />,
+          expandedRowKeys: expandedRowKeys,
+          expandIcon: () => null,
+          columnWidth: '0px', // Set width to 0 if not already removed by expandIcon: () => null
+        }}
         bordered
         className="custom-table"
         scroll={{ x: '100%', y: 'calc(100vh - 250px)' }}
       />
+
     </div>
   );
 };
