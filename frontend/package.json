@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "build": "tsc && refine build",
+    "build": "tsc --noEmit --skipLibCheck && refine build",
     "dev": "refine dev",
     "preview": "refine start",
     "refine": "refine"

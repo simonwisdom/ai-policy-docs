@@ -1,5 +1,6 @@
 import React from 'react';
 import { IDocument } from '../interfaces';
+import { format } from 'date-fns';
 
 interface ExpandedRowContentProps {
   record: IDocument;
@@ -41,7 +42,7 @@ const ExpandedRowContent: React.FC<ExpandedRowContentProps> = ({ record }) => {
       {record.dates && <p><strong>Dates:</strong> {record.dates}</p>}
       {record.html_url && <p><strong>Federal Register Link:</strong> <a href={record.html_url} target="_blank" rel="noopener noreferrer">View official release</a></p>}
       {record.regulations_dot_gov_comments_url && <p><strong>Regulations.gov Link:</strong> <a href={record.regulations_dot_gov_comments_url} target="_blank" rel="noopener noreferrer">Document details</a></p>}
-      {record.effective_on && <p><strong>Effective On:</strong> {record.effective_on}</p>}
+      {record.effective_on && <p><strong>Effective On:</strong> {format(new Date(record.effective_on), 'MMMM d, yyyy')}</p>}
     </div>
   );
 };

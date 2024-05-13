@@ -1,0 +1,9 @@
+{
+    "name": "ai-policy-docs",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "npm run start --prefix backend",
+      "build": "npm run build --prefix frontend",
+      "postinstall": "npm install --prefix backend && npm install --prefix frontend"
+    }
+  }

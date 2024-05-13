@@ -13,11 +13,12 @@ export interface IPost {
 }
 
 export interface IDataResponse {
-  data: IDocument[];
+  data: T[];
   total: number;
   page: number;
   pageSize: number;
 }
+
 
 export interface IDocument {
   document_number: string;
@@ -47,9 +48,6 @@ export interface IDocument {
   page_views_count: number;
   tags: string;
 }
-
-
-
 
 interface IImage {
   id: string;

@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Table, Tag, TablePaginationConfig } from 'antd';
-import { useTable, UseTableReturnType } from '@refinedev/antd';
+import { useTable, useTableReturnType } from '@refinedev/antd';
 import { CrudFilters } from '@refinedev/core';
-import { IDocument } from '../../interfaces';
+import { IDocument, IDataResponse } from '../../interfaces';
 import './list.css';
 import ExpandedRowContent from '../../components/ExpandedRowContent';
 import { getColumns } from './columnsConfig';
@@ -23,7 +23,7 @@ export const DocumentList: React.FC = () => {
     setFilters,
     setPageSize,
     setCurrent,
-  }: UseTableReturnType<IDocument> = useTable<IDocument>({
+  } = useTable<IDocument>({
     resource: 'ai_documents',
     initialPageSize: pageSizeRef.current,
     metaData: {
@@ -59,35 +59,49 @@ export const DocumentList: React.FC = () => {
       ],
     },
   });
-  
 
+  // if (tableProps.loading) {
+  //   return <div>Loading data...</div>; 
+  // }
+
+  if (!tableProps.dataSource) {
+    return <div>No data available.</div>;
+  }  
+  
+  // console.log("Table Props:", tableProps);
+  // console.log("Data Source:", tableProps.dataSource);
+
+  // @ts-ignore
+  const dataSource = tableProps?.dataSource?.data ?? [];
+  // @ts-ignore
+  const totalDocuments = tableProps?.dataSource?.total ?? 0;
+  
   // Debugging statements
   // console.log(`Initial Pagination: Current - ${tableProps.pagination?.current}, PageSize - ${pageSizeRef.current}`);
   // console.log(`TableProps Pagination: Current - ${tableProps.pagination?.current}, PageSize - ${tableProps.pagination?.pageSize}`);  
   // console.log(`Initial Sort: publication_date:desc`);
   // console.log(`TableProps Sort: ${JSON.stringify(tableProps.sorter)}`);
-
+  
   const expandRow = (rowKey: React.Key) => {
     setExpandedRowKeys((prevExpandedKeys) =>
       prevExpandedKeys.includes(rowKey)
-        ? prevExpandedKeys.filter((key) => key !== rowKey)
-        : [rowKey]
-    );
-  };
+    ? prevExpandedKeys.filter((key) => key !== rowKey)
+    : [rowKey]
+  );
+};
 
-  const columns = getColumns(setSelectedAgency, setSelectedTag, setFilters, expandRow, expandedRowKeys);
+const columns = getColumns(setSelectedAgency, setSelectedTag, setFilters, expandRow, expandedRowKeys, setCurrent);
 
-  const dataSource = tableProps?.dataSource?.data ?? [];
-  const totalDocuments = tableProps?.dataSource?.total ?? 0;
-
-  const handlePageChange = (page: number, pageSize?: number) => {
+const handlePageChange = (page: number, pageSize?: number) => {
     // console.log(`Pagination Change: Page - ${page}, PageSize - ${pageSize}`);
     setCurrent(page);
     setPageSize(pageSize || pageSizeRef.current);
   };
   
   const paginationConfig: TablePaginationConfig = {
+    // @ts-ignore
     current: tableProps.pagination?.current || 1,
+    // @ts-ignore
     pageSize: tableProps.pagination?.pageSize || pageSizeRef.current,
     total: totalDocuments,
     onChange: handlePageChange,

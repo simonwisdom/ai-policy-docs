@@ -11,7 +11,8 @@ export const getColumns = (
   setSelectedTag: (tag: string) => void,
   setFilters: (filters: any[]) => void,
   expandRow: (rowKey: string) => void,
-  expandedRowKeys: React.Key[]
+  expandedRowKeys: React.Key[],
+  setCurrent: (page: number) => void, 
 ): ColumnsType<IDocument> => [
   {
     title: '',
@@ -70,7 +71,7 @@ export const getColumns = (
             key={`${agency}-${index}`}
             onClick={(event) => {
               event.stopPropagation();
-              handleAgencyFilterChange(agency, setSelectedAgency, setFilters);
+              handleAgencyFilterChange(agency, setSelectedAgency, setFilters, setCurrent);
             }}
             style={{
               cursor: 'pointer',
@@ -113,7 +114,7 @@ export const getColumns = (
             key={`${tag}-${index}`}
             onClick={(event) => {
               event.stopPropagation();
-              handleTagFilterChange(tag, setSelectedTag, setFilters);
+              handleTagFilterChange(tag, setSelectedTag, setFilters, setCurrent);
             }}
             style={{
               cursor: 'pointer',

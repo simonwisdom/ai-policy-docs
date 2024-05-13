@@ -8,6 +8,9 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Serve frontend build files
+// app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
 // Logger setup
 const logger = winston.createLogger({
   level: "info",
@@ -76,24 +79,23 @@ app.get("/api/ai_documents", async (req, res) => {
     const end = resetPagination ? 10 : parseInt(_end, 10);
 
     // Log the received query parameters and pagination values
-    logger.info(`Received Query Params: ${JSON.stringify(req.query)}`);
-    logger.info(`Reset Pagination: ${resetPagination}`);
-    logger.info(`Computed Pagination: Start - ${start}, End - ${end}`);
+    // logger.info(`Received Query Params: ${JSON.stringify(req.query)}`);
+    // logger.info(`Reset Pagination: ${resetPagination}`);
+    // logger.info(`Computed Pagination: Start - ${start}, End - ${end}`);
 
     const pageSize = parseInt(_end, 10) - parseInt(_start, 10);
     const page = Math.floor(parseInt(_start, 10) / pageSize) + 1;
-
-    // Log the derived pagination parameters
-    logger.info(`Received Query Params: ${JSON.stringify(req.query)}`);
-    logger.info(`Computed Pagination: Page - ${page}, PageSize - ${pageSize}`);
 
     let query = "SELECT * FROM ai_documents";
     const conditions = [];
     const values = [];
 
     // Parse sorting
-    const [field, order] = sort.split(":");
-    let sortClause = ` ORDER BY ${field} ${order === "desc" ? "DESC" : "ASC"}`;
+    let sortClause = '';
+    if (sort) {
+      const [field, order] = sort.split(':');
+      sortClause = ` ORDER BY ${field} ${order === 'desc' ? 'DESC' : 'ASC'}`;
+    }
 
     // Apply filtering conditions
     if (agency_names) {
@@ -147,12 +149,16 @@ app.get("/api/ai_documents", async (req, res) => {
     // Log the count query and values
     console.log("Count Query:", countQuery);
     console.log("Count Query Values:", countValues);
-
+    
     const countResult = await pool.query(countQuery, countValues);
     const totalCount = parseInt(countResult.rows[0].count, 10);
+    
+    console.log("Total Count:", totalCount);
 
-    // console.log(`Received Parameters: Page - ${page}, PageSize - ${pageSize}, Offset - ${offset}`);
+
+    console.log(`Received Parameters: Page - ${page}, PageSize - ${pageSize}, Offset - ${offset}`);
     // logger.info(`Sorted Document Numbers on Page ${page}: ${result.rows.map((doc) => doc.publication_date).slice(0, 10).join(', ')}`);
+
 
     res.json({
       data: result.rows,
@@ -164,6 +170,11 @@ app.get("/api/ai_documents", async (req, res) => {
     logger.error(err.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+// Catch-all route to serve the frontend's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
 
 app.listen(PORT, () => {
