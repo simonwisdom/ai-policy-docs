@@ -3,13 +3,14 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const morgan = require("morgan");
 const winston = require("winston");
+const path = require('path');
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Serve frontend build files
-// app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 
 // Logger setup
 const logger = winston.createLogger({
