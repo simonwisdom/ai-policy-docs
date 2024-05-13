@@ -28,7 +28,7 @@ const CustomLayout = () => (
 
 const API_URL =
   import.meta.env.MODE === "production"
-    ? `${import.meta.env.VITE_BACKEND_URL_PROD || "https://your-backend-app-name.herokuapp.com"}/api`
+    ? `${import.meta.env.VITE_BACKEND_URL_PROD || "https://aipolicydocs.herokuapp.com"}/api`
     : `${import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3001"}/api`;
 
 const App: React.FC = () => {
