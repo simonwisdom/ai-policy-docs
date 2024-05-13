@@ -5,7 +5,7 @@ import {
   ErrorComponent,
   RefineThemes,
 } from "@refinedev/antd";
-import dataProvider from "@refinedev/airtable";
+import dataProvider from "@refinedev/simple-rest";
 import routerProvider, {
   NavigateToResource,
   UnsavedChangesNotifier,
@@ -14,14 +14,7 @@ import routerProvider, {
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ConfigProvider, App as AntdApp, Layout } from "antd";
 import "@refinedev/antd/dist/reset.css";
-import { DocumentList, DocumentShow } from "./pages/documents";
-
-const API_TOKEN = import.meta.env.VITE_AIRTABLE_API_TOKEN || "default_token";
-const BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID || "default_base_id";
-
-if (!import.meta.env.VITE_AIRTABLE_API_TOKEN || !import.meta.env.VITE_AIRTABLE_BASE_ID) {
-  console.error("API token or Base ID is undefined.");
-}
+import { DocumentList } from "./pages/documents";
 
 const { Content } = Layout;
 
@@ -33,13 +26,18 @@ const CustomLayout = () => (
   </Layout>
 );
 
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? `${import.meta.env.VITE_BACKEND_URL_PROD || "https://your-backend-app-name.herokuapp.com"}/api`
+    : `${import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3001"}/api`;
+
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ConfigProvider theme={RefineThemes.Blue}>
         <AntdApp>
           <Refine
-            dataProvider={dataProvider(API_TOKEN, BASE_ID)}
+            dataProvider={dataProvider(API_URL)}
             routerProvider={routerProvider}
             resources={[
               {
@@ -54,13 +52,12 @@ const App: React.FC = () => {
               warnWhenUnsavedChanges: true,
             }}
           >
-            <Routes>
-              <Route element={<CustomLayout />}>
-                <Route index element={<DocumentList />} />
-                <Route path="/:id" element={<DocumentShow />} />
-                <Route path="*" element={<ErrorComponent />} />
-              </Route>
-            </Routes>
+              <Routes>
+                <Route element={<CustomLayout />}>
+                  <Route index element={<DocumentList />} />
+                  <Route path="*" element={<ErrorComponent />} />
+                </Route>
+              </Routes>
             <UnsavedChangesNotifier />
             <DocumentTitleHandler />
           </Refine>

@@ -7,18 +7,24 @@ interface ExpandedRowContentProps {
 
 const ExpandedRowContent: React.FC<ExpandedRowContentProps> = ({ record }) => {
   // Helper function to convert LLM summary text to bullet points
-  const renderBulletPoints = (summary: string) => {
-    return (
-      <ul>
-        {summary.split('*').map((item, index) => {
-          const trimmedItem = item.trim();
-          if (trimmedItem) {
-            return <li key={index}>{trimmedItem}</li>;
-          }
-          return null;
-        })}
-      </ul>
-    );
+  const renderBulletPoints = (summary: string | undefined) => {
+    if (!summary) {
+      return null;
+    }
+  
+    const bulletPoints = summary.split('*').map((item, index) => {
+      const trimmedItem = item.trim();
+      if (trimmedItem) {
+        return <li key={`bullet-${index}`}>{trimmedItem}</li>;
+      }
+      return null;
+    }).filter(Boolean);
+  
+    if (bulletPoints.length === 0) {
+      return null;
+    }
+  
+    return <ul>{bulletPoints}</ul>;
   };
     return (
     <div>

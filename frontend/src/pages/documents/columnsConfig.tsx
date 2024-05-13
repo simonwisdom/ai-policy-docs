@@ -1,10 +1,10 @@
 import { ColumnsType } from 'antd/es/table';
-import { Tooltip } from 'antd';
+import { Tooltip, Tag } from 'antd';
 import { IDocument } from '../../interfaces';
 import ExpandableText from '../../components/ExpandableText';
 import FlatButton from '../../components/FlatButton';
-import { Tag } from 'antd';
 import { handleAgencyFilterChange, handleTagFilterChange } from './utils';
+import { format } from 'date-fns';
 
 export const getColumns = (
   setSelectedAgency: (agency: string) => void,
@@ -25,10 +25,10 @@ export const getColumns = (
             <span role="img" aria-label="Popular" style={{ marginRight: '10px' }}>🔥</span>
           </Tooltip>
         )}
-        {expandedRowKeys.includes(record.id) ? (
-          <span onClick={() => expandRow(record.id)} style={{ cursor: 'pointer' }}>-</span>
+        {expandedRowKeys.includes(record.document_number) ? (
+          <span onClick={() => expandRow(record.document_number)} style={{ cursor: 'pointer' }}>-</span>
         ) : (
-          <span onClick={() => expandRow(record.id)} style={{ cursor: 'pointer' }}>+</span>
+          <span onClick={() => expandRow(record.document_number)} style={{ cursor: 'pointer' }}>+</span>
         )}
       </div>
     ),
@@ -50,21 +50,13 @@ export const getColumns = (
     key: 'title',
     width: 200,
     ellipsis: true,
-    render: (title: string, record: IDocument) => {
-      const firstPunctuationIndex = title.search(/[,;]/);
-      let truncatedTitle = title;
-      if (firstPunctuationIndex !== -1) {
-        truncatedTitle = title.substring(0, firstPunctuationIndex + 1) + '...';
-      }
-      return (
-        <ExpandableText 
+    render: (title: string, record: IDocument) => (
+      <ExpandableText
         content={title}
-        onClick={() => expandRow(record.id)}
+        onClick={() => expandRow(record.document_number)}
         maxHeight={80}
-        />
-        // <ExpandableText content={title} title={title} maxLength={40} />
-      );
-    },
+      />
+    ),
   },
   {
     title: 'Agency Names',
@@ -73,12 +65,12 @@ export const getColumns = (
     key: 'agency_names',
     render: (agencyNames: string, record: IDocument) => (
       <div>
-        {agencyNames.split(', ').map((agency) => (
+        {agencyNames.split(', ').map((agency, index) => (
           <Tag
-            key={agency}
+            key={`${agency}-${index}`}
             onClick={(event) => {
               event.stopPropagation();
-              handleAgencyFilterChange(agency, setSelectedAgency, setFilters); // Remove the pagination onChange argument
+              handleAgencyFilterChange(agency, setSelectedAgency, setFilters);
             }}
             style={{
               cursor: 'pointer',
@@ -101,24 +93,28 @@ export const getColumns = (
   },
   {
     title: 'Publication Date',
-    width: 120,
+    width: 150,
     dataIndex: 'publication_date',
     key: 'publication_date',
     defaultSortOrder: 'descend',
     sorter: (a: IDocument, b: IDocument) =>
       new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime(),
+    render: (date: string | Date) => format(new Date(date), 'MMMM d, yyyy'), // Example: May 6, 2024
   },
   {
     title: 'Tags',
     width: 100,
     dataIndex: 'tags',
     key: 'tags',
-    render: (tags: string[], record: IDocument) => (
+    render: (tags: string[] | undefined, record: IDocument) => (
       <div>
-        {tags?.map((tag) => (
+        {Array.isArray(tags) && tags.map((tag, index) => (
           <Tag
-            key={tag}
-            onClick={() => handleTagFilterChange(tag, setSelectedTag, setFilters)}
+            key={`${tag}-${index}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleTagFilterChange(tag, setSelectedTag, setFilters);
+            }}
             style={{
               cursor: 'pointer',
               marginBottom: '4px',
@@ -147,13 +143,13 @@ export const getColumns = (
       if (!text) {
         return <div style={{ minHeight: '24px' }}>—</div>;
       }
-  
+
       // Formatting the text to handle Markdown-like inputs and display them as HTML
       const formattedText = text.replace(/\\\*/g, '*').replace(/\n/g, '<br>');
       return (
         <ExpandableText
           content={formattedText}
-          onClick={() => expandRow(record.id)}
+          onClick={() => expandRow(record.document_number)}
           maxHeight={100}
         />
       );
@@ -177,10 +173,11 @@ export const getColumns = (
       }
 
       const shouldShowCommentButton = commentsCloseOn > currentDate;
+      const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy'); // Example: May 6, 2024
 
       return (
         <div>
-          {text}
+          {formattedDate}
           {shouldShowCommentButton && (
             <div style={{ marginTop: '4px' }}>
               <FlatButton onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}>

@@ -1,3 +1,4 @@
+// components/ExpandableText.tsx
 import React from 'react';
 import styled from 'styled-components';
 
@@ -28,10 +29,20 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
   maxWidth = 400,
   maxHeight = 54,
   onClick,
-}) => (
-  <TextContainer style={{ maxWidth: `${maxWidth}px`, maxHeight: `${maxHeight}px` }} onClick={onClick}>
-    <div dangerouslySetInnerHTML={{ __html: content }} />
-  </TextContainer>
-);
+}) => {
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevents triggering the parent click event
+    onClick();
+  };
+
+  return (
+    <TextContainer
+      style={{ maxWidth: `${maxWidth}px`, maxHeight: `${maxHeight}px` }}
+      onClick={handleClick}
+    >
+      <div dangerouslySetInnerHTML={{ __html: content }} />
+    </TextContainer>
+  );
+};
 
 export default ExpandableText;
