@@ -50,7 +50,10 @@ const logQuery = (query, values) => {
   logger.info(`Executing query: ${formatQuery(query, values)}`);
 };
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://aipolicydocs.org',
+}));
+
 app.use(express.json());
 
 // Simple route to test connection
