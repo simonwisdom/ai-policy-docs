@@ -1,7 +1,7 @@
 import json
 import requests
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from federal_register.client import FederalRegister
 import re
 import os
@@ -16,8 +16,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 DATABASE_URL = os.environ['DATABASE_URL']
 TABLE_NAME = os.environ['TABLE_NAME']
-TERMS = 'machine learning'
-
+TERMS = []
+# TERMS = ['GPU','machine learning','artificial intelligence','compute','semiconductors','CHIPS']
 
 
 # Initialize the Federal Register client
@@ -219,4 +219,5 @@ def main(terms, start_date, end_date, limit):
 
 if __name__ == '__main__':
     today_date = datetime.now().strftime('%Y-%m-%d')
-    main(terms=TERMS, start_date='2020-01-01', end_date=today_date, limit=1000)
+    yesterday_date = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d')
+    main(terms=TERMS, start_date=yesterday_date, end_date=today_date, limit=1000)
