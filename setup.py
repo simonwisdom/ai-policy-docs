@@ -11,10 +11,12 @@ setup(
         'python-dateutil',
         'psycopg2',
         'tqdm',
+        'anthropic'
     ],
     entry_points={
         'console_scripts': [
             'pull_fr_documents = scripts.pull_fr_documents:main',
+            'summarize_fr_documents = scripts.summarize_fr_documents:main',
         ],
     },
 )

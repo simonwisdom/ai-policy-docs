@@ -3,3 +3,4 @@ federal_register
 python-dateutil
 psycopg2
 tqdm
+anthropic

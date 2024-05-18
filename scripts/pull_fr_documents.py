@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 DATABASE_URL = os.environ['DATABASE_URL']
-TABLE_NAME = os.environ['TABLE_NAME']
+FR_DOCUMENTS_TABLE_NAME = os.environ['FR_DOCUMENTS_TABLE_NAME']
 TERMS = []
 # TERMS = ['GPU','machine learning','artificial intelligence','compute','semiconductors','CHIPS']
 
@@ -103,7 +103,7 @@ def transform_regulations_url(document_id, docket_ids):
 
 def fetch_existing_document_numbers(conn):
     with conn.cursor() as cur:
-        cur.execute(f"SELECT document_number FROM {TABLE_NAME}")
+        cur.execute(f"SELECT document_number FROM {FR_DOCUMENTS_TABLE_NAME}")
         existing_numbers = {row[0] for row in cur.fetchall()}
     logging.info(f"Fetched {len(existing_numbers)} existing document numbers from PostgreSQL.")
     return existing_numbers
@@ -168,7 +168,7 @@ def insert_to_postgres(conn, documents, existing_numbers):
     if values:
             with conn.cursor() as cur:
                 try:
-                    execute_values(cur, f"INSERT INTO {TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
+                    execute_values(cur, f"INSERT INTO {FR_DOCUMENTS_TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
                     conn.commit()
                     logging.info(f"Inserted {len(values)} new records into PostgreSQL.")
                 except psycopg2.IntegrityError as e:
@@ -185,7 +185,7 @@ def insert_to_postgres(conn, documents, existing_numbers):
                             ', '.join(doc.get('agency_names', [])),
                             # ... (rest of the doc.get calls)
                         ) for doc in unique_documents]
-                        execute_values(cur, f"INSERT INTO {TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
+                        execute_values(cur, f"INSERT INTO {FR_DOCUMENTS_TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
                         conn.commit()
                         logging.info(f"Inserted {len(unique_documents)} unique records into PostgreSQL.")
                     else:
@@ -196,7 +196,7 @@ def insert_to_postgres(conn, documents, existing_numbers):
 
 
     with conn.cursor() as cur:
-        execute_values(cur, f"INSERT INTO {TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
+        execute_values(cur, f"INSERT INTO {FR_DOCUMENTS_TABLE_NAME} ({', '.join(columns)}) VALUES %s", values)
     conn.commit()
     logging.info(f"Inserted {len(new_documents)} new records into PostgreSQL.")
 
