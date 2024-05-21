@@ -65,7 +65,7 @@ app.get("/", (req, res) => {
 app.get("/api/ai_documents", async (req, res) => {
   try {
     const {
-      agency_names,
+      agency_names_like,
       tags,
       type,
       comments_close_on,
@@ -89,11 +89,13 @@ app.get("/api/ai_documents", async (req, res) => {
       values: [],
     };
 
+    console.log("Received query parameters:", req.query);
+
     const conditions = [];
 
-    if (agency_names) {
+    if (agency_names_like) {
       conditions.push("agency_names ILIKE $1");
-      query.values.push(`%${agency_names}%`);
+      query.values.push(`%${agency_names_like}%`);
     }
 
     if (search_query_like) {
@@ -140,7 +142,12 @@ app.get("/api/ai_documents", async (req, res) => {
     query.text += " LIMIT $" + (query.values.length + 1) + " OFFSET $" + (query.values.length + 2);
     query.values.push(pageSize, offset);
 
+    console.log("Constructed SQL query:", query.text);
+    console.log("Query values:", query.values);
+
     const result = await pool.query(query);
+
+    // console.log("Query result rows:", result.rows);
 
     const countQuery = {
       text: "SELECT COUNT(*) FROM ai_documents",

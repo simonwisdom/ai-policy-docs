@@ -10,6 +10,7 @@ export const handleAgencyFilterChange = (
   setCurrent: SetCurrent,
   searchText: string | null
 ): void => {
+  console.log("handleAgencyFilterChange called with agency:", agency);
   setSelectedAgency(agency);
 
   const filters: CrudFilters = [];
@@ -28,6 +29,7 @@ export const handleAgencyFilterChange = (
     value: agency,
   });
 
+  console.log("Applying filters:", filters);
   setFilters(filters, 'replace');
   setCurrent(1); // Reset pagination to the first page
 };

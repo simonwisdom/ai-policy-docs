@@ -13,6 +13,7 @@ export const getColumns = (
   expandRow: (rowKey: string) => void,
   expandedRowKeys: React.Key[],
   setCurrent: (page: number) => void, 
+  searchText: string | null,
 ): ColumnsType<IDocument> => [
   {
     title: '',
@@ -73,7 +74,8 @@ export const getColumns = (
             key={`${agency}-${index}`}
             onClick={(event) => {
               event.stopPropagation();
-              handleAgencyFilterChange(agency, setSelectedAgency, setFilters, setCurrent);
+              console.log("Clicked agency tag:", agency);
+              handleAgencyFilterChange(agency, setSelectedAgency, setFilters, setCurrent, searchText);
             }}
             style={{
               cursor: 'pointer',

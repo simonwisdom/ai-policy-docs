@@ -118,7 +118,15 @@ export const DocumentList: React.FC = () => {
   );
 };
 
-const columns = getColumns(setSelectedAgency, setSelectedTag, setFilters, expandRow, expandedRowKeys, setCurrent);
+const columns = getColumns(
+  setSelectedAgency, 
+  setSelectedTag, 
+  setFilters, 
+  expandRow, 
+  expandedRowKeys, 
+  setCurrent, 
+  searchText
+);
 
 const handlePageChange = (page: number, pageSize?: number) => {
     // console.log(`Pagination Change: Page - ${page}, PageSize - ${pageSize}`);
