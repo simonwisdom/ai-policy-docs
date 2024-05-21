@@ -6,9 +6,10 @@ import { IDocument, IDataResponse } from '../../interfaces';
 import './list.css';
 import ExpandedRowContent from '../../components/ExpandedRowContent';
 import { getColumns } from './columnsConfig';
-import { handleAgencyFilterChange, handleTypeFilterChange, handleClearFilters } from './utils';
+import { handleAgencyFilterChange, handleTypeFilterChange, handleClearFilters, handleSearch } from './utils';
+import { Input, Button } from 'antd';
 
-const FILTER_TAGS: string[] = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document', 'Open Comments'];
+const FILTER_TAGS: string[] = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document', 'Open Comments', 'Popular'];
 
 export const DocumentList: React.FC = () => {
   const [activeTypeFilter, setActiveTypeFilter] = useState<string | null>(null);
@@ -17,6 +18,7 @@ export const DocumentList: React.FC = () => {
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   // const [current, setCurrent] = useState(1);
   const pageSizeRef = useRef(10);
+  const [searchText, setSearchText] = useState('');
 
   const {
     tableProps,
@@ -45,10 +47,24 @@ export const DocumentList: React.FC = () => {
         {
           field: 'type',
           operator: 'eq',
-          value: activeTypeFilter,
+          value: activeTypeFilter === 'Popular' ? undefined : activeTypeFilter,
+        },
+        {
+          field: 'page_views_count',
+          operator: 'gte',
+          value: activeTypeFilter === 'Popular' ? 3000 : undefined,
+        },
+        {
+          field: 'search_query',
+          operator: 'contains',
+          value: searchText,
         },
       ],
       defaultBehavior: 'replace',
+    },
+    onSearch: (filters: CrudFilters) => {
+      console.log("Search Filters:", filters);
+      return filters;
     },
     sorters: {
       initial: [
@@ -130,6 +146,17 @@ const handlePageChange = (page: number, pageSize?: number) => {
         )}
         <div style={{ marginBottom: 20 }}>
           Total Documents: {totalDocuments}
+        </div>
+          <div style={{ marginBottom: 16 }}>
+          <Input
+            placeholder="Search LLM Summary"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: 200, marginRight: 8 }}
+          />
+          <Button onClick={() => handleSearch(searchText, setFilters, setCurrent)}>
+            Search
+          </Button>
         </div>
       </div>
       <Table<IDocument>

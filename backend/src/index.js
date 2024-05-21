@@ -51,7 +51,7 @@ const logQuery = (query, values) => {
 };
 
 app.use(cors({
-  origin: 'https://aipolicydocs.org',
+  origin: process.env.NODE_ENV === 'production' ? 'https://aipolicydocs.org' : 'http://localhost:5173',
 }));
 
 app.use(express.json());
@@ -69,6 +69,8 @@ app.get("/api/ai_documents", async (req, res) => {
       tags,
       type,
       comments_close_on,
+      page_views_count_gte,
+      search_query_like,
       _start = req.query._start || 0,
       _end = req.query._end || 10,
       sort = "publication_date:desc",
@@ -83,7 +85,7 @@ app.get("/api/ai_documents", async (req, res) => {
     const end = resetPagination ? 10 : parseInt(_end, 10);
 
     // Log the received query parameters and pagination values
-    // logger.info(`Received Query Params: ${JSON.stringify(req.query)}`);
+    console.log(`Received Query Params: ${JSON.stringify(req.query)}`);
     // logger.info(`Reset Pagination: ${resetPagination}`);
     // logger.info(`Computed Pagination: Start - ${start}, End - ${end}`);
 
@@ -107,18 +109,43 @@ app.get("/api/ai_documents", async (req, res) => {
       values.push(`%${agency_names}%`);
     }
 
+    if (search_query_like) {
+      const insertQuery = 'INSERT INTO search_queries (query, timestamp) VALUES ($1, $2)';
+      const insertValues = [search_query_like, new Date()];
+      await pool.query(insertQuery, insertValues);
+
+      conditions.push(`(llm_summary ILIKE $${conditions.length + 1} OR abstract ILIKE $${conditions.length + 2})`);
+      values.push(`%${search_query_like}%`, `%${search_query_like}%`);
+    }
+
+    if (type === 'Popular') {
+      conditions.push('page_views_count >= 3000');
+      // console.log("Popular filter applied");
+    } else if (type) {
+      conditions.push(`type = $${conditions.length + 1}`);
+      values.push(type);
+      console.log("Type filter applied:", type);
+    }
+
+    // Log the conditions array and values array
+    // console.log("Conditions:", conditions);
+    // console.log("Values:", values);
+
     if (tags) {
       conditions.push(`tags ILIKE $${conditions.length + 1}`);
       values.push(`%${tags}%`);
     }
 
     if (type === "Open Comments") {
-      // conditions.push(`type = $${conditions.length + 1}`);
-      // values.push(type);
       conditions.push(`CAST(comments_close_on AS DATE) > CURRENT_DATE`);
-    } else if (type) {
+    } else if (type && type !== 'Popular') {
       conditions.push(`type = $${conditions.length + 1}`);
       values.push(type);
+    }
+
+    if (page_views_count_gte) {
+      conditions.push(`page_views_count >= $${conditions.length + 1}`);
+      values.push(parseInt(page_views_count_gte, 10));
     }
 
     // Add conditions to query if available
@@ -151,16 +178,16 @@ app.get("/api/ai_documents", async (req, res) => {
     }
 
     // Log the count query and values
-    console.log("Count Query:", countQuery);
-    console.log("Count Query Values:", countValues);
+    // console.log("Count Query:", countQuery);
+    // console.log("Count Query Values:", countValues);
     
     const countResult = await pool.query(countQuery, countValues);
     const totalCount = parseInt(countResult.rows[0].count, 10);
     
-    console.log("Total Count:", totalCount);
+    // console.log("Total Count:", totalCount);
 
 
-    console.log(`Received Parameters: Page - ${page}, PageSize - ${pageSize}, Offset - ${offset}`);
+    // console.log(`Received Parameters: Page - ${page}, PageSize - ${pageSize}, Offset - ${offset}`);
     // logger.info(`Sorted Document Numbers on Page ${page}: ${result.rows.map((doc) => doc.publication_date).slice(0, 10).join(', ')}`);
 
 

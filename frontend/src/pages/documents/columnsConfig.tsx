@@ -21,9 +21,11 @@ export const getColumns = (
     width: 50,
     render: (pageViewsCount: number, record: IDocument) => (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {pageViewsCount > 5000 && (
-          <Tooltip title="This document has more than 5000 page views" placement="right">
-            <span role="img" aria-label="Popular" style={{ marginRight: '10px' }}>🔥</span>
+        {pageViewsCount >= 3000 && (
+          <Tooltip title={`This document has received a lot of attention! It has ${new Intl.NumberFormat().format(pageViewsCount)} page views.`} placement="right">
+            <span role="img" aria-label="Popular" style={{ marginRight: '10px' }}>
+              {pageViewsCount >= 30000 ? '🔥🔥' : '🔥'}
+            </span>
           </Tooltip>
         )}
         {expandedRowKeys.includes(record.document_number) ? (
@@ -102,39 +104,39 @@ export const getColumns = (
       new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime(),
     render: (date: string | Date) => format(new Date(date), 'MMMM d, yyyy'), // Example: May 6, 2024
   },
-  {
-    title: 'Tags',
-    width: 100,
-    dataIndex: 'tags',
-    key: 'tags',
-    render: (tags: string[] | undefined, record: IDocument) => (
-      <div>
-        {Array.isArray(tags) && tags.map((tag, index) => (
-          <Tag
-            key={`${tag}-${index}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              handleTagFilterChange(tag, setSelectedTag, setFilters, setCurrent);
-            }}
-            style={{
-              cursor: 'pointer',
-              marginBottom: '4px',
-              maxWidth: '250px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'normal',
-              height: 'auto',
-              display: 'inline-block',
-              lineHeight: 'normal',
-              padding: '4px'
-            }}
-          >
-            {tag}
-          </Tag>
-        ))}
-      </div>
-    ),
-  },
+  // {
+  //   title: 'Tags',
+  //   width: 100,
+  //   dataIndex: 'tags',
+  //   key: 'tags',
+  //   render: (tags: string[] | undefined, record: IDocument) => (
+  //     <div>
+  //       {Array.isArray(tags) && tags.map((tag, index) => (
+  //         <Tag
+  //           key={`${tag}-${index}`}
+  //           onClick={(event) => {
+  //             event.stopPropagation();
+  //             handleTagFilterChange(tag, setSelectedTag, setFilters, setCurrent);
+  //           }}
+  //           style={{
+  //             cursor: 'pointer',
+  //             marginBottom: '4px',
+  //             maxWidth: '250px',
+  //             overflow: 'hidden',
+  //             textOverflow: 'ellipsis',
+  //             whiteSpace: 'normal',
+  //             height: 'auto',
+  //             display: 'inline-block',
+  //             lineHeight: 'normal',
+  //             padding: '4px'
+  //           }}
+  //         >
+  //           {tag}
+  //         </Tag>
+  //       ))}
+  //     </div>
+  //   ),
+  // },
   {
     title: 'LLM Summary',
     dataIndex: 'llm_summary',

@@ -28,16 +28,24 @@ export const handleTypeFilterChange = (
 ): void => {
   setActiveTypeFilter(type);
 
-  if (type) {
+  if (type === 'Popular') {
+    console.log("Setting Popular filter");
+    setFilters([
+      {
+        field: 'page_views_count',
+        operator: 'gte',
+        value: 3000,
+      },
+    ], 'replace');
+  } else {
+    console.log("Setting Type filter:", type);
     setFilters([
       {
         field: 'type',
         operator: 'eq',
         value: type,
       },
-    ], 'merge');
-  } else {
-    setFilters([], 'replace');
+    ], 'replace');
   }
   setCurrent(1);
 };
@@ -71,6 +79,24 @@ export const handleTagFilterChange = (
       },
     ],
     'replace'
+  );
+  setCurrent(1);
+};
+
+export const handleSearch = (
+  searchText: string,
+  setFilters: SetFilters,
+  setCurrent: SetCurrent,
+): void => {
+  setFilters(
+    [
+      {
+        field: 'search_query',
+        operator: 'contains',
+        value: searchText,
+      },
+    ],
+    'merge',
   );
   setCurrent(1);
 };

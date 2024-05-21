@@ -166,8 +166,7 @@ def process_batch(rows):
             try:
                 # Attempt to fix common JSON formatting errors
                 corrected_json = correct_json_formatting(response_text)
-                logger.info(f"Corrected JSON for document {document_number}:")
-                # logger.info(f"Corrected JSON for document {document_number}:")
+                logger.info(f"Success! Parsed JSON response from LLM for document {document_number}:")
                 # logger.info(corrected_json)
 
                 response_json = json.loads(corrected_json)
