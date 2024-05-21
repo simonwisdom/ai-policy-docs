@@ -8,58 +8,90 @@ export const handleAgencyFilterChange = (
   setSelectedAgency: (agency: string) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
+  searchText: string | null
 ): void => {
   setSelectedAgency(agency);
-  setFilters([
-    {
-      field: 'agency_names',
-      operator: 'eq',
-      value: agency,
-    },
-  ], 'merge');
+
+  const filters: CrudFilters = [];
+
+  if (searchText) {
+    filters.push({
+      field: 'search_query',
+      operator: 'contains',
+      value: searchText,
+    });
+  }
+
+  filters.push({
+    field: 'agency_names',
+    operator: 'contains',
+    value: agency,
+  });
+
+  setFilters(filters, 'replace');
   setCurrent(1); // Reset pagination to the first page
 };
+
 
 export const handleTypeFilterChange = (
   type: string | null,
   setActiveTypeFilter: (type: string | null) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
+  searchText: string | null
 ): void => {
   setActiveTypeFilter(type);
 
-  if (type === 'Popular') {
-    console.log("Setting Popular filter");
-    setFilters([
-      {
-        field: 'page_views_count',
-        operator: 'gte',
-        value: 3000,
-      },
-    ], 'replace');
-  } else {
-    console.log("Setting Type filter:", type);
-    setFilters([
-      {
-        field: 'type',
-        operator: 'eq',
-        value: type,
-      },
-    ], 'replace');
+  const filters: CrudFilters = [];
+
+  if (searchText) {
+    filters.push({
+      field: 'search_query',
+      operator: 'contains',
+      value: searchText,
+    });
   }
+
+  if (type === 'Popular') {
+    filters.push({
+      field: 'page_views_count',
+      operator: 'gte',
+      value: 3000,
+    });
+  } else {
+    filters.push({
+      field: 'type',
+      operator: 'eq',
+      value: type,
+    });
+  }
+
+  setFilters(filters, 'replace');
   setCurrent(1);
 };
 
 export const handleClearFilters = (
   setActiveTypeFilter: (type: string | null) => void,
   setSelectedAgency: (agency: string | null) => void,
+  setSearchText: (searchText: string) => void,
+  setSearchApplied: (applied: boolean) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
+  initialFilterState: CrudFilters,
 ): void => {
   setActiveTypeFilter(null);
   setSelectedAgency(null);
-  setFilters([]);
-  setCurrent(1);
+  setSearchText("");
+  setSearchApplied(false);
+
+  // Clear all filters
+  setFilters([], 'replace');
+  
+  // Apply the initial empty filter state
+  setTimeout(() => {
+    setFilters(initialFilterState, 'replace');
+    setCurrent(1);
+  }, 0);
 };
 
 
@@ -85,9 +117,13 @@ export const handleTagFilterChange = (
 
 export const handleSearch = (
   searchText: string,
+  setSearchText: (searchText: string) => void,
+  setSearchApplied: (applied: boolean) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
 ): void => {
+  setSearchText(searchText);
+  setSearchApplied(!!searchText);
   setFilters(
     [
       {

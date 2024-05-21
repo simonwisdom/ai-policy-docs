@@ -71,125 +71,89 @@ app.get("/api/ai_documents", async (req, res) => {
       comments_close_on,
       page_views_count_gte,
       search_query_like,
-      _start = req.query._start || 0,
-      _end = req.query._end || 10,
+      _start = 0,
+      _end = 10,
       sort = "publication_date:desc",
     } = req.query;
 
-    // Check if the type or comments_close_on filter is present
     const hasFilter = type || comments_close_on;
-
-    // Reset pagination if the filter is present
     const resetPagination = hasFilter;
     const start = resetPagination ? 0 : parseInt(_start, 10);
     const end = resetPagination ? 10 : parseInt(_end, 10);
 
-    // Log the received query parameters and pagination values
-    console.log(`Received Query Params: ${JSON.stringify(req.query)}`);
-    // logger.info(`Reset Pagination: ${resetPagination}`);
-    // logger.info(`Computed Pagination: Start - ${start}, End - ${end}`);
+    const pageSize = end - start;
+    const page = Math.floor(start / pageSize) + 1;
 
-    const pageSize = parseInt(_end, 10) - parseInt(_start, 10);
-    const page = Math.floor(parseInt(_start, 10) / pageSize) + 1;
+    const query = {
+      text: "SELECT * FROM ai_documents",
+      values: [],
+    };
 
-    let query = "SELECT * FROM ai_documents";
     const conditions = [];
-    const values = [];
 
-    // Parse sorting
-    let sortClause = '';
-    if (sort) {
-      const [field, order] = sort.split(':');
-      sortClause = ` ORDER BY ${field} ${order === 'desc' ? 'DESC' : 'ASC'}`;
-    }
-
-    // Apply filtering conditions
     if (agency_names) {
-      conditions.push(`agency_names ILIKE $${conditions.length + 1}`);
-      values.push(`%${agency_names}%`);
+      conditions.push("agency_names ILIKE $1");
+      query.values.push(`%${agency_names}%`);
     }
 
     if (search_query_like) {
-      const insertQuery = 'INSERT INTO search_queries (query, timestamp) VALUES ($1, $2)';
-      const insertValues = [search_query_like, new Date()];
-      await pool.query(insertQuery, insertValues);
+      const insertQuery = {
+        text: "INSERT INTO search_queries (query, timestamp) VALUES ($1, $2)",
+        values: [search_query_like, new Date()],
+      };
+      await pool.query(insertQuery);
 
-      conditions.push(`(llm_summary ILIKE $${conditions.length + 1} OR abstract ILIKE $${conditions.length + 2})`);
-      values.push(`%${search_query_like}%`, `%${search_query_like}%`);
+      conditions.push("(llm_summary ILIKE $" + (query.values.length + 1) + " OR abstract ILIKE $" + (query.values.length + 2) + ")");
+      query.values.push(`%${search_query_like}%`, `%${search_query_like}%`);
     }
 
-    if (type === 'Popular') {
-      conditions.push('page_views_count >= 3000');
-      // console.log("Popular filter applied");
+    if (type === "Popular") {
+      conditions.push("page_views_count >= $" + (query.values.length + 1));
+      query.values.push(3000);
+    } else if (type === "Open Comments") {
+      conditions.push("CAST(comments_close_on AS DATE) > CURRENT_DATE");
     } else if (type) {
-      conditions.push(`type = $${conditions.length + 1}`);
-      values.push(type);
-      console.log("Type filter applied:", type);
+      conditions.push("type = $" + (query.values.length + 1));
+      query.values.push(type);
     }
-
-    // Log the conditions array and values array
-    // console.log("Conditions:", conditions);
-    // console.log("Values:", values);
 
     if (tags) {
-      conditions.push(`tags ILIKE $${conditions.length + 1}`);
-      values.push(`%${tags}%`);
-    }
-
-    if (type === "Open Comments") {
-      conditions.push(`CAST(comments_close_on AS DATE) > CURRENT_DATE`);
-    } else if (type && type !== 'Popular') {
-      conditions.push(`type = $${conditions.length + 1}`);
-      values.push(type);
+      conditions.push("tags ILIKE $" + (query.values.length + 1));
+      query.values.push(`%${tags}%`);
     }
 
     if (page_views_count_gte) {
-      conditions.push(`page_views_count >= $${conditions.length + 1}`);
-      values.push(parseInt(page_views_count_gte, 10));
+      conditions.push("page_views_count >= $" + (query.values.length + 1));
+      query.values.push(parseInt(page_views_count_gte, 10));
     }
 
-    // Add conditions to query if available
     if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(" AND ")}`;
+      query.text += " WHERE " + conditions.join(" AND ");
     }
 
-    // Apply sorting before pagination
-    query += sortClause;
+    if (sort) {
+      const [field, order] = sort.split(":");
+      query.text += " ORDER BY " + field + (order === "desc" ? " DESC" : " ASC");
+    }
 
-    // Pagination
     const offset = (page - 1) * pageSize;
-    query += ` LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-    values.push(pageSize, offset);
+    query.text += " LIMIT $" + (query.values.length + 1) + " OFFSET $" + (query.values.length + 2);
+    query.values.push(pageSize, offset);
 
-    // Log the generated SQL query and values
-    console.log("Generated SQL Query:", query);
-    console.log("SQL Query Values:", values);
+    const result = await pool.query(query);
 
-    // Log and execute the main query
-    const result = await pool.query(query, values);
-
-    // Count query for total count
-    let countQuery = "SELECT COUNT(*) FROM ai_documents";
-    const countValues = [];
+    const countQuery = {
+      text: "SELECT COUNT(*) FROM ai_documents",
+      values: [],
+    };
 
     if (conditions.length > 0) {
-      countQuery += ` WHERE ${conditions.join(" AND ")}`;
-      countValues.push(...values.slice(0, values.length - 2)); // Exclude the last two values (pageSize and offset)
+      countQuery.text += " WHERE " + conditions.join(" AND ");
+      countQuery.values = query.values.slice(0, -2);
     }
 
-    // Log the count query and values
-    // console.log("Count Query:", countQuery);
-    // console.log("Count Query Values:", countValues);
-    
-    const countResult = await pool.query(countQuery, countValues);
+    const countResult = await pool.query(countQuery);
     const totalCount = parseInt(countResult.rows[0].count, 10);
-    
-    // console.log("Total Count:", totalCount);
-
-
-    // console.log(`Received Parameters: Page - ${page}, PageSize - ${pageSize}, Offset - ${offset}`);
-    // logger.info(`Sorted Document Numbers on Page ${page}: ${result.rows.map((doc) => doc.publication_date).slice(0, 10).join(', ')}`);
-
 
     res.json({
       data: result.rows,

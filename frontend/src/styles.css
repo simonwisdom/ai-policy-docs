@@ -1,0 +1,92 @@
+/* styles.css */
+
+/* Header styles */
+.custom-header {
+  background-color: #1890ff;
+  padding: 0 20px;
+}
+
+.custom-header nav {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.custom-header ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.custom-header li {
+  margin-right: 20px;
+}
+
+.custom-header a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.custom-header a:hover {
+  text-decoration: underline;
+}
+
+/* About page styles */
+.about-page {
+  padding: 20px;
+}
+
+.about-page h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.about-page h2 {
+  font-size: 20px;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.about-page p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.about-page ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  margin-bottom: 16px;
+}
+
+.about-page li {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.about-page a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.about-page a:hover {
+  text-decoration: underline;
+}
+
+/* Charts page styles */
+.charts-page {
+  padding: 20px;
+}
+
+.charts-page h1 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.charts-page p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}

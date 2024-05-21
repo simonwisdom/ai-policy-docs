@@ -15,11 +15,30 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ConfigProvider, App as AntdApp, Layout } from "antd";
 import "@refinedev/antd/dist/reset.css";
 import { DocumentList } from "./pages/documents";
+import { About } from "./pages/About";
+import { Charts } from "./pages/Charts";
+import { Link } from 'react-router-dom';
+import './styles.css';
 
 const { Content } = Layout;
 
 const CustomLayout = () => (
   <Layout style={{ minHeight: "100vh" }}>
+    {/* <Layout.Header className="custom-header">
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/about">About</Link>
+          </li>
+          <li>
+            <Link to="/charts">Charts</Link>
+          </li>
+        </ul>
+      </nav>
+    </Layout.Header> */}
     <Content>
       <Outlet />
     </Content>
@@ -55,6 +74,8 @@ const App: React.FC = () => {
               <Routes>
                 <Route element={<CustomLayout />}>
                   <Route index element={<DocumentList />} />
+                  <Route path="/about" element={<About />} />
+                <Route path="/charts" element={<Charts />} />
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
               </Routes>
