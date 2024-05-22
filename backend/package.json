@@ -7,6 +7,7 @@
         "dev": "nodemon src/index.js"
     },
     "dependencies": {
+        "algoliasearch": "^4.23.3",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
@@ -20,5 +21,5 @@
     "files": [
         "src",
         "../frontend/dist"
-      ]
+    ]
 }
