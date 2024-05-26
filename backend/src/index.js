@@ -1,4 +1,6 @@
 const express = require("express");
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const cors = require("cors");
 const { Pool } = require("pg");
 const morgan = require("morgan");
@@ -6,11 +8,46 @@ const winston = require("winston");
 const path = require('path');
 require("dotenv").config();
 
+const algoliaSearchRouter = require('./algoliaSearch');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// PostgreSQL Pool setup
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+// Session middleware setup
+app.use(
+  session({
+    store: new pgSession({
+      pool, // Use the existing connection pool
+    }),
+    secret: process.env.SESSION_SECRET || 'default_secret', // Use a strong secret
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false, sameSite: 'lax' }, // Adjust settings for development
+  })
+);
+
 // Serve frontend build files
 app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
+// Morgan middleware for HTTP request logging
+app.use(morgan("combined", { stream: { write: (message) => logger.info(message.trim()) } }));
+
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV,
+}));
+
+app.use(express.json());
+
+// Use the Algolia search router
+app.use(algoliaSearchRouter);
 
 // Logger setup
 const logger = winston.createLogger({
@@ -26,87 +63,83 @@ const logger = winston.createLogger({
   ],
 });
 
-// Morgan middleware for HTTP request logging
-app.use(morgan("combined", { stream: { write: (message) => logger.info(message.trim()) } }));
+async function fetchFilteredDocuments(documentFilter, filters) {
+  // console.log('Document Filter:', documentFilter);
 
-// PostgreSQL Pool setup
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+  const { query, page, pageSize } = constructQuery(filters, documentFilter);
 
-// Utility function to format the SQL query with values
-const formatQuery = (query, values) => {
-  return query.replace(/\$\d+/g, (match) => {
-    const index = parseInt(match.substring(1), 10) - 1;
-    return JSON.stringify(values[index]) || match;
-  });
-};
+  // Log the constructed query for debugging
+  logger.info(`Constructed Query: ${query.text}`);
+  logger.info(`Query Values: ${JSON.stringify(query.values)}`);
 
-// Utility function for logging queries
-const logQuery = (query, values) => {
-  logger.info(`Executing query: ${formatQuery(query, values)}`);
-};
+  const result = await pool.query(query);
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://aipolicydocs.org' : 'http://localhost:5173',
-}));
+  const countQuery = {
+    text: "SELECT COUNT(*) FROM ai_documents",
+    values: [],
+  };
 
-app.use(express.json());
+  if (query.values.length > 0) {
+    const whereClause = query.text.split("WHERE")[1];
+    if (whereClause) {
+      countQuery.text += " WHERE " + whereClause.split("ORDER")[0].trim();
+      countQuery.values = query.values.slice(0, -2);
+    }
+  }
 
-// Simple route to test connection
-app.get("/", (req, res) => {
-  res.send("Hello from the backend!");
-});
+  // Log the count query for debugging
+  logger.info(`Count Query: ${countQuery.text}`);
+  logger.info(`Count Query Values: ${JSON.stringify(countQuery.values)}`);
 
-// Get all documents with optional filtering and pagination
-app.get("/api/ai_documents", async (req, res) => {
-  try {
-    const {
-      agency_names_like,
-      tags,
-      type,
-      comments_close_on,
-      page_views_count_gte,
-      search_query_like,
-      _start = 0,
-      _end = 10,
-      sort = "publication_date:desc",
-    } = req.query;
+  const countResult = await pool.query(countQuery);
+  const totalCount = parseInt(countResult.rows[0].count, 10);
 
-    const hasFilter = type || comments_close_on;
-    const resetPagination = hasFilter;
-    const start = resetPagination ? 0 : parseInt(_start, 10);
-    const end = resetPagination ? 10 : parseInt(_end, 10);
+  return {
+    data: result.rows,
+    total: totalCount,
+    page: page,
+    pageSize: pageSize,
+  };
+}
 
-    const pageSize = end - start;
-    const page = Math.floor(start / pageSize) + 1;
+function constructQuery(filters, documentFilter) {
+  const {
+    agency_names_like,
+    tags,
+    type,
+    comments_close_on,
+    page_views_count_gte,
+    search_query_like,
+    _start = 0,
+    _end = 10,
+    _sort = "publication_date",
+    _order = "desc",
+  } = filters;
 
-    const query = {
-      text: "SELECT * FROM ai_documents",
-      values: [],
-    };
+  const query = {
+    text: "SELECT * FROM ai_documents",
+    values: [],
+  };
 
-    console.log("Received query parameters:", req.query);
+  const conditions = [];
 
-    const conditions = [];
-
+  if (documentFilter) {
+    conditions.push("document_number = ANY($" + (query.values.length + 1) + ")");
+    query.values.push(documentFilter);
+  } else {
     if (agency_names_like) {
-      conditions.push("agency_names ILIKE $1");
+      conditions.push("agency_names ILIKE $" + (query.values.length + 1));
       query.values.push(`%${agency_names_like}%`);
     }
 
     if (search_query_like) {
-      const insertQuery = {
-        text: "INSERT INTO search_queries (query, timestamp) VALUES ($1, $2)",
-        values: [search_query_like, new Date()],
-      };
-      await pool.query(insertQuery);
-
-      conditions.push("(llm_summary ILIKE $" + (query.values.length + 1) + " OR abstract ILIKE $" + (query.values.length + 2) + ")");
-      query.values.push(`%${search_query_like}%`, `%${search_query_like}%`);
+      conditions.push(
+        "(llm_summary ILIKE $" + (query.values.length + 1) + 
+        " OR abstract ILIKE $" + (query.values.length + 2) + 
+        " OR title ILIKE $" + (query.values.length + 3) + 
+        " OR document_number ILIKE $" + (query.values.length + 4) + ")"
+      );
+      query.values.push(`%${search_query_like}%`, `%${search_query_like}%`, `%${search_query_like}%`, `%${search_query_like}%`);
     }
 
     if (type === "Popular") {
@@ -128,45 +161,40 @@ app.get("/api/ai_documents", async (req, res) => {
       conditions.push("page_views_count >= $" + (query.values.length + 1));
       query.values.push(parseInt(page_views_count_gte, 10));
     }
+  }
 
-    if (conditions.length > 0) {
-      query.text += " WHERE " + conditions.join(" AND ");
-    }
+  if (conditions.length > 0) {
+    query.text += " WHERE " + conditions.join(" AND ");
+  }
 
-    if (sort) {
-      const [field, order] = sort.split(":");
-      query.text += " ORDER BY " + field + (order === "desc" ? " DESC" : " ASC");
-    }
+  query.text += ` ORDER BY ${_sort} ${_order}`;
 
-    const offset = (page - 1) * pageSize;
-    query.text += " LIMIT $" + (query.values.length + 1) + " OFFSET $" + (query.values.length + 2);
-    query.values.push(pageSize, offset);
+  const start = parseInt(_start, 10);
+  const end = parseInt(_end, 10);
+  const pageSize = end - start;
+  const page = Math.floor(start / pageSize) + 1;
+  const offset = (page - 1) * pageSize;
 
-    console.log("Constructed SQL query:", query.text);
-    console.log("Query values:", query.values);
+  query.text += " LIMIT $" + (query.values.length + 1) + " OFFSET $" + (query.values.length + 2);
+  query.values.push(pageSize, offset);
 
-    const result = await pool.query(query);
+  return { query, page, pageSize };
+}
 
-    // console.log("Query result rows:", result.rows);
-
-    const countQuery = {
-      text: "SELECT COUNT(*) FROM ai_documents",
-      values: [],
-    };
-
-    if (conditions.length > 0) {
-      countQuery.text += " WHERE " + conditions.join(" AND ");
-      countQuery.values = query.values.slice(0, -2);
-    }
-
-    const countResult = await pool.query(countQuery);
-    const totalCount = parseInt(countResult.rows[0].count, 10);
+// Get all documents with optional filtering and pagination
+app.get("/api/ai_documents", async (req, res) => {
+  try {
+    const documentFilter = req.session.documentFilter;
+    const result = await fetchFilteredDocuments(documentFilter, req.query);
+    
+    // Log the result for debugging
+    // logger.info(`API Response: ${JSON.stringify(result)}`);
 
     res.json({
-      data: result.rows,
-      total: totalCount,
-      page: parseInt(page, 10),
-      pageSize: parseInt(pageSize, 10),
+      data: result.data,
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
     });
   } catch (err) {
     logger.error(err.message);
@@ -174,10 +202,6 @@ app.get("/api/ai_documents", async (req, res) => {
   }
 });
 
-// Catch-all route to serve the frontend's index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
-});
 
 app.listen(PORT, () => {
   logger.info(`Backend server running on port ${PORT}`);

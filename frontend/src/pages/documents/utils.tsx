@@ -1,4 +1,6 @@
 import { CrudFilters } from '@refinedev/core';
+import { useNavigate } from 'react-router-dom';
+
 
 type SetFilters = (filters: CrudFilters, behavior?: 'merge' | 'replace') => void;
 type SetCurrent = (page: number) => void;
@@ -135,6 +137,48 @@ export const handleSearch = (
       },
     ],
     'merge',
+  );
+  setCurrent(1);
+};
+
+export const handleSetDocumentFilter = async (
+  documentNumbers: number[],
+  setFilters: (filters: any[], mode: string) => void,
+  setCurrent: (page: number) => void,
+): Promise<void> => {
+  const backendUrl = import.meta.env.MODE === 'production'
+    ? `${import.meta.env.VITE_BACKEND_URL_PROD}/api/set_document_filter`
+    : `${import.meta.env.VITE_BACKEND_URL_DEV}/api/set_document_filter`;
+
+  try {
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ documentNumbers }),
+    });
+
+    if (response.ok) {
+      setFilters([], 'replace');
+      setCurrent(1);
+    } else {
+      const errorText = await response.text();
+      console.error('Failed to set document filter:', errorText);
+    }
+  } catch (error) {
+    console.error('Error setting document filter:', error);
+  }
+};
+
+
+export const handleRemoveDocumentFilter = (
+  setFilters: SetFilters,
+  setCurrent: SetCurrent,
+): void => {
+  setFilters(
+    filters.filter((filter) => filter.field !== 'document_number'),
+    'replace'
   );
   setCurrent(1);
 };

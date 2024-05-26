@@ -178,7 +178,7 @@ export const getColumns = (
       }
 
       const shouldShowCommentButton = commentsCloseOn > currentDate;
-      const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy'); // Example: May 6, 2024
+      const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy');
 
       return (
         <div>
