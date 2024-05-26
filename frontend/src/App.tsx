@@ -21,8 +21,6 @@ import { Charts } from "./pages/Charts";
 import { Link } from 'react-router-dom';
 import './styles.css';
 
-import ChatbotPage from './pages/ChatbotPage';
-
 const { Content, Sider } = Layout;
 
 interface CustomLayoutProps {
@@ -44,12 +42,6 @@ const CustomLayout: React.FC<CustomLayoutProps> = ({ isSidebarOpen, toggleSideba
           <li>
             <Link to="/charts">Charts</Link>
           </li> */}
-          {/* <li>
-            <Link to="/chatbot">Chatbot</Link>
-          </li> */}
-          <li>
-            <Button onClick={toggleSidebar}>Chatbot</Button>
-          </li>
         </ul>
       </nav>
     </Layout.Header>
@@ -63,7 +55,6 @@ const CustomLayout: React.FC<CustomLayoutProps> = ({ isSidebarOpen, toggleSideba
           width={400}
           style={{ position: 'fixed', right: 0, top: 64, bottom: 0 }}
         >
-          <ChatbotPage />
         </Sider>
       )}
     </Layout>
@@ -108,7 +99,6 @@ const App: React.FC = () => {
                   <Route index element={<DocumentList isSidebarOpen={isSidebarOpen} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/charts" element={<Charts />} />
-                  <Route path="/chatbot" element={<ChatbotPage />} />
                   <Route path="*" element={<ErrorComponent />} />
                 </Route>
               </Routes>
