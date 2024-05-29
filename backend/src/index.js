@@ -102,6 +102,20 @@ async function fetchFilteredDocuments(documentFilter, filters) {
   };
 }
 
+async function logSearchQuery(query) {
+  const insertQuery = {
+    text: "INSERT INTO search_queries (query, timestamp) VALUES ($1, NOW())",
+    values: [query],
+  };
+
+  try {
+    await pool.query(insertQuery);
+    logger.info(`Search query logged: ${query}`);
+  } catch (err) {
+    logger.error(`Error logging search query: ${err.message}`);
+  }
+}
+
 function constructQuery(filters, documentFilter) {
   const {
     agency_names_like,
@@ -185,6 +199,13 @@ function constructQuery(filters, documentFilter) {
 app.get("/api/ai_documents", async (req, res) => {
   try {
     const documentFilter = req.session.documentFilter;
+
+    const searchQuery = req.query.search_query_like;
+
+    if (searchQuery) {
+      await logSearchQuery(searchQuery);
+    }
+
     const result = await fetchFilteredDocuments(documentFilter, req.query);
     
     // Log the result for debugging
