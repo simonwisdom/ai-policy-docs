@@ -17,6 +17,7 @@ setup(
         'console_scripts': [
             'pull_fr_documents = scripts.pull_fr_documents:main',
             'summarize_fr_documents = scripts.summarize_fr_documents:main',
+            'update_fr_documents = scripts.update_fr_documents:main',
         ],
     },
 )

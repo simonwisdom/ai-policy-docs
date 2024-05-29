@@ -1,5 +1,5 @@
 import { Refine } from "@refinedev/core";
-import React, { useState } from 'react';
+import React from 'react';
 import {
   useNotificationProvider,
   ThemedLayoutV2,
@@ -21,14 +21,9 @@ import { Charts } from "./pages/Charts";
 import { Link } from 'react-router-dom';
 import './styles.css';
 
-const { Content, Sider } = Layout;
+const { Content } = Layout;
 
-interface CustomLayoutProps {
-  isSidebarOpen: boolean;
-  toggleSidebar: () => void;
-}
-
-const CustomLayout: React.FC<CustomLayoutProps> = ({ isSidebarOpen, toggleSidebar }) => (
+const CustomLayout: React.FC = () => (
   <Layout style={{ minHeight: "100vh" }}>
     <Layout.Header className="custom-header">
       <nav>
@@ -46,17 +41,9 @@ const CustomLayout: React.FC<CustomLayoutProps> = ({ isSidebarOpen, toggleSideba
       </nav>
     </Layout.Header>
     <Layout>
-      <Content style={{ marginRight: isSidebarOpen ? '400px' : '0' }}>
-      {/* <Content style={{ marginRight: isSidebarOpen ? '400px' : '0', transition: 'margin-right 0.3s' }}> */}
+      <Content>
         <Outlet />
       </Content>
-      {isSidebarOpen && (
-        <Sider
-          width={400}
-          style={{ position: 'fixed', right: 0, top: 64, bottom: 0 }}
-        >
-        </Sider>
-      )}
     </Layout>
   </Layout>
 );
@@ -67,13 +54,6 @@ const API_URL =
     : `${import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3001"}/api`;
 
 const App: React.FC = () => {
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
     <BrowserRouter>
       <ConfigProvider theme={RefineThemes.Blue}>
@@ -94,14 +74,14 @@ const App: React.FC = () => {
               warnWhenUnsavedChanges: true,
             }}
           >
-              <Routes>
-              <Route element={<CustomLayout isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}>
-                  <Route index element={<DocumentList isSidebarOpen={isSidebarOpen} />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/charts" element={<Charts />} />
-                  <Route path="*" element={<ErrorComponent />} />
-                </Route>
-              </Routes>
+            <Routes>
+              <Route element={<CustomLayout />}>
+                <Route index element={<DocumentList />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/charts" element={<Charts />} />
+                <Route path="*" element={<ErrorComponent />} />
+              </Route>
+            </Routes>
             <UnsavedChangesNotifier />
             <DocumentTitleHandler />
           </Refine>
