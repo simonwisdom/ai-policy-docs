@@ -1,20 +1,15 @@
 import { CrudFilters } from '@refinedev/core';
-import { useNavigate } from 'react-router-dom';
-
 
 type SetFilters = (filters: CrudFilters, behavior?: 'merge' | 'replace') => void;
 type SetCurrent = (page: number) => void;
 
-export const handleAgencyFilterChange = (
-  agency: string,
-  setSelectedAgency: (agency: string) => void,
-  setFilters: SetFilters,
-  setCurrent: SetCurrent,
-  searchText: string | null
-): void => {
-  console.log("handleAgencyFilterChange called with agency:", agency);
-  setSelectedAgency(agency);
-
+export const buildFilters = (
+  searchText: string | null,
+  selectedAgency: string | null,
+  activeTypeFilter: string | null,
+  isOpenComments: boolean,
+  isPopular: boolean
+): CrudFilters => {
   const filters: CrudFilters = [];
 
   if (searchText) {
@@ -25,15 +20,57 @@ export const handleAgencyFilterChange = (
     });
   }
 
-  filters.push({
-    field: 'agency_names',
-    operator: 'contains',
-    value: agency,
-  });
+  if (selectedAgency) {
+    filters.push({
+      field: 'agency_names',
+      operator: 'contains',
+      value: selectedAgency,
+    });
+  }
 
-  console.log("Applying filters:", filters);
-  setFilters(filters, 'replace');
-  setCurrent(1); // Reset pagination to the first page
+  if (activeTypeFilter && activeTypeFilter !== 'Popular' && activeTypeFilter !== 'Open Comments') {
+    filters.push({
+      field: 'type',
+      operator: 'eq',
+      value: activeTypeFilter,
+    });
+  }
+
+  if (isOpenComments) {
+    filters.push({
+      field: 'comments_close_on',
+      operator: 'gt',
+      value: new Date().toISOString().split('T')[0],
+    });
+  }
+
+  if (isPopular) {
+    filters.push({
+      field: 'page_views_count',
+      operator: 'gte',
+      value: 3000,
+    });
+  }
+
+  console.log('Built filters:', filters);
+  return filters;
+};
+
+export const handleAgencyFilterChange = (
+  agency: string | null,
+  setSelectedAgency: (agency: string | null) => void,
+  setFilters: SetFilters,
+  setCurrent: SetCurrent,
+  searchText: string | null,
+  activeTypeFilter: string | null,
+  isOpenComments: boolean,
+  isPopular: boolean
+): void => {
+  setSelectedAgency(agency);
+  const filters = buildFilters(searchText, agency, activeTypeFilter, isOpenComments, isPopular);
+  console.log('Applying filters in handleAgencyFilterChange:', filters);
+  setFilters(filters, 'merge');
+  setCurrent(1);
 };
 
 
@@ -42,35 +79,22 @@ export const handleTypeFilterChange = (
   setActiveTypeFilter: (type: string | null) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
-  searchText: string | null
+  searchText: string | null,
+  selectedAgency: string | null,
+  isOpenComments: boolean,
+  isPopular: boolean
 ): void => {
   setActiveTypeFilter(type);
+  const filters = buildFilters(searchText, selectedAgency, type, isOpenComments, isPopular);
+  console.log('Applying filters in handleTypeFilterChange:', filters);
+  setFilters(filters, type ? 'merge' : 'replace');
+  setCurrent(1);
+};
 
-  const filters: CrudFilters = [];
-
-  if (searchText) {
-    filters.push({
-      field: 'search_query',
-      operator: 'contains',
-      value: searchText,
-    });
-  }
-
-  if (type === 'Popular') {
-    filters.push({
-      field: 'page_views_count',
-      operator: 'gte',
-      value: 3000,
-    });
-  } else {
-    filters.push({
-      field: 'type',
-      operator: 'eq',
-      value: type,
-    });
-  }
-
-  setFilters(filters, 'replace');
+const handleIsPopularChange = (checked: boolean) => {
+  setIsPopular(checked);
+  const updatedFilters = buildFilters(searchText, selectedAgency, activeTypeFilter, isOpenComments, checked);
+  setFilters(updatedFilters, 'merge');
   setCurrent(1);
 };
 
@@ -81,41 +105,18 @@ export const handleClearFilters = (
   setSearchApplied: (applied: boolean) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
-  initialFilterState: CrudFilters,
+  setIsOpenComments: (isOpenComments: boolean) => void,
+  setIsPopular: (isPopular: boolean) => void
 ): void => {
   setActiveTypeFilter(null);
   setSelectedAgency(null);
   setSearchText("");
   setSearchApplied(false);
+  setIsOpenComments(false);
+  setIsPopular(false);
 
-  // Clear all filters
+  console.log('Clearing filters');
   setFilters([], 'replace');
-  
-  // Apply the initial empty filter state
-  setTimeout(() => {
-    setFilters(initialFilterState, 'replace');
-    setCurrent(1);
-  }, 0);
-};
-
-
-export const handleTagFilterChange = (
-  tag: string,
-  setSelectedTag: (tag: string) => void,
-  setFilters: SetFilters,
-  setCurrent: SetCurrent,
-): void => {
-  setSelectedTag(tag);
-  setFilters(
-    [
-      {
-        field: 'tags',
-        operator: 'eq',
-        value: tag,
-      },
-    ],
-    'replace'
-  );
   setCurrent(1);
 };
 
@@ -125,21 +126,22 @@ export const handleSearch = (
   setSearchApplied: (applied: boolean) => void,
   setFilters: SetFilters,
   setCurrent: SetCurrent,
+  activeTypeFilter: string | null,
+  isOpenComments: boolean,
+  isPopular: boolean,
+  selectedAgency: string | null
 ): void => {
+  // console.log('Performing search with text:', searchText);
   setSearchText(searchText);
-  setSearchApplied(!!searchText);
-  setFilters(
-    [
-      {
-        field: 'search_query',
-        operator: 'contains',
-        value: searchText,
-      },
-    ],
-    'merge',
-  );
+  const isSearchApplied = !!searchText;
+  // console.log('Setting searchApplied to:', isSearchApplied);
+  setSearchApplied(isSearchApplied);
+  const filters = buildFilters(searchText, selectedAgency, activeTypeFilter, isOpenComments, isPopular);
+  console.log('Applying filters in handleSearch:', filters);
+  setFilters(filters, 'merge');
   setCurrent(1);
 };
+
 
 export const handleSetDocumentFilter = async (
   documentNumbers: number[],
@@ -160,6 +162,7 @@ export const handleSetDocumentFilter = async (
     });
 
     if (response.ok) {
+      console.log('Setting document filter successfully');
       setFilters([], 'replace');
       setCurrent(1);
     } else {
@@ -171,13 +174,13 @@ export const handleSetDocumentFilter = async (
   }
 };
 
-
 export const handleRemoveDocumentFilter = (
   setFilters: SetFilters,
   setCurrent: SetCurrent,
 ): void => {
+  console.log('Removing document filter');
   setFilters(
-    filters.filter((filter) => filter.field !== 'document_number'),
+    (prevFilters) => prevFilters.filter((filter) => filter.field !== 'document_number'),
     'replace'
   );
   setCurrent(1);

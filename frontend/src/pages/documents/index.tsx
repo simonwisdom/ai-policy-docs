@@ -1,1 +1,2 @@
-export { DocumentList } from "./list";
+import DocumentList from "./list";
+export { DocumentList };

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Table, Tag, TablePaginationConfig } from 'antd';
+import React, { useRef, useEffect, useState } from 'react';
+import { Table, Tag, TablePaginationConfig, Select, Switch, Tooltip, Tabs } from 'antd';
 import { useTable, CrudFilters } from '@refinedev/antd';
 import { IDocument } from '../../interfaces';
 import './list.css';
@@ -8,33 +8,39 @@ import { getColumns } from './columnsConfig';
 import { handleAgencyFilterChange, handleTypeFilterChange, handleClearFilters, handleSearch, handleRemoveDocumentFilter } from './utils';
 import { Input, Button } from 'antd';
 import ChatbotResults from '../../components/ChatbotResults';
+import { StateProvider, useStateContext } from '../../components/StateContext';
+import FilterSection from '../../components/FilterSection';
+// import FilterSummary from '../../components/FilterSummary';
+import HelpSidebar from '../../components/HelpSidebar'; 
+import DocumentDescription from '../../components/DocumentDescription';
 
 
-const FILTER_TAGS: string[] = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document', 'Open Comments', 'Popular'];
+const DOCUMENT_TYPES = ['Rule', 'Proposed Rule', 'Notice', 'Presidential Document'];
 
-interface DocumentListProps {
-  isSidebarOpen: boolean;
-  filters: CrudFilters;
-  setFilters: (filters: CrudFilters) => void;
-}
+const { TabPane } = Tabs;
 
-export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => {
-  const [activeTypeFilter, setActiveTypeFilter] = useState<string | null>(null);
+const DocumentList: React.FC<DocumentListProps & { isHelpSidebarOpen: boolean }> = ({ isSidebarOpen, isHelpSidebarOpen }) => {
+  const {
+    activeTypeFilter, setActiveTypeFilter,
+    selectedAgency, setSelectedAgency,
+    searchText, setSearchText,
+    searchApplied, setSearchApplied,
+    isOpenComments, setIsOpenComments,
+    isPopular, setIsPopular
+  } = useStateContext();
+
   const [selectedTag, setSelectedTag] = useState<string>('');
-  const [selectedAgency, setSelectedAgency] = useState<string | null>(null);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
   const pageSizeRef = useRef(10);
-  const [searchText, setSearchText] = useState<string | null>(null);
-  const [searchApplied, setSearchApplied] = useState(false);
   const [documentNumbers, setDocumentNumbers] = useState<number[]>([]);
-  const initialFilterState: CrudFilters = [];
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [llmResponse, setLLMResponse] = useState('');
-  const [isChatbotSidebarOpen, setIsChatbotSidebarOpen] = useState(false);
-  const [isChatbotLoading, setIsChatbotLoading] = useState(false);
-  const [isChatbotInitialized, setIsChatbotInitialized] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('1');
 
 
+
+  const handleTabChange = (key) => {
+    console.log('Selected tab:', key);
+    setSelectedTab(key);
+  };
 
   const initialFilters: CrudFilters = [
     ...(selectedAgency ? [
@@ -51,11 +57,18 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
         value: activeTypeFilter === 'Popular' ? undefined : activeTypeFilter,
       },
     ] : []),
-    ...(activeTypeFilter === 'Popular' ? [
+    ...(isPopular ? [
       {
         field: 'page_views_count',
         operator: 'gte',
         value: 3000,
+      },
+    ] : []),
+    ...(isOpenComments ? [
+      {
+        field: 'comments_close_on',
+        operator: 'gt',
+        value: new Date().toISOString().split('T')[0], // Current date in 'YYYY-MM-DD' format
       },
     ] : []),
     ...(searchText ? [
@@ -99,7 +112,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
       defaultBehavior: 'replace',
     },
     onSearch: (filters: CrudFilters) => {
-      // console.log("Search Filters:", filters);
       return filters;
     },
     sorters: {
@@ -113,7 +125,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
   });
 
   useEffect(() => {
-    // console.log("Document Numbers in useEffect:", documentNumbers);
     if (documentNumbers.length > 0) {
       setFilters((prevFilters) => [
         ...prevFilters.filter((filter) => filter.field !== 'document_number'),
@@ -123,43 +134,9 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
           value: documentNumbers,
         },
       ]);
-      setCurrent(1); // Reset to the first page if needed
+      setCurrent(1);
     }
   }, [documentNumbers, setFilters, setCurrent]);
-
-  const handleChatbotSearch = async (query: string) => {
-
-    setIsChatbotLoading(true);
-    setIsChatbotSidebarOpen(true);
-    setIsChatbotInitialized(true);
-
-    try {
-      const backendUrl = import.meta.env.MODE === 'production'
-        ? `${import.meta.env.VITE_BACKEND_URL_PROD || 'https://aipolicydocs-2612a9348c68.herokuapp.com'}/api/algolia_search?query=${encodeURIComponent(query)}`
-        : `${import.meta.env.VITE_BACKEND_URL_DEV || 'http://localhost:3001'}/api/algolia_search?query=${encodeURIComponent(query)}`;
-
-      // console.log(`Sending request to: ${backendUrl}`);
-      const response = await fetch(backendUrl);
-      // console.log(`Response status: ${response.status}`);
-
-      setIsChatbotLoading(false);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const parsedResponse = await response.json();
-      // console.log('Parsed response:', parsedResponse);
-
-      if (parsedResponse.llmResponse && parsedResponse.searchResults) {
-        setLLMResponse(parsedResponse.llmResponse);
-        setSearchResults(parsedResponse.searchResults);
-        setIsChatbotSidebarOpen(true);
-      }
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-      setIsChatbotLoading(false);
-    }
-  };
 
   if (!tableProps.dataSource) {
     return <div>No data available.</div>;
@@ -203,22 +180,40 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
     onChange: handlePageChange,
   };
 
+  const tabItems = [
+    { key: '1', label: 'US Executive' },
+    { key: '2', label: 'US Legislative' },
+    { key: '3', label: 'UK' },
+    { key: '4', label: 'EU' },
+    { key: '5', label: 'China' }
+  ];
+
   return (
     <div>
-      <div className="filter-tags">
-        {FILTER_TAGS.map((type: string, index: number) => (
-          <Tag
-            color={activeTypeFilter === type ? 'blue' : 'default'}
-            onClick={() =>
-              handleTypeFilterChange(type, setActiveTypeFilter, setFilters, setCurrent, searchText)
-            }
-            key={`filter-tag-${index}`}
-          >
-            {type}
-          </Tag>
-        ))}
-        <Tag
-          onClick={() =>
+      {isHelpSidebarOpen && <HelpSidebar onClose={() => setIsHelpSidebarOpen(false)} />} 
+
+
+    <Tabs defaultActiveKey="1" onChange={handleTabChange} items={tabItems} />
+    
+    {selectedTab === '1' && <DocumentDescription selectedTab={selectedTab} />}
+
+    {selectedTab === '1' && (
+        <FilterSection
+          handleSearch={() =>
+            handleSearch(
+              searchText,
+              setSearchText,
+              setSearchApplied,
+              setFilters,
+              setCurrent,
+              activeTypeFilter,
+              isOpenComments,
+              isPopular,
+              selectedAgency
+            )
+          }
+          // handleChatbotSearch={() => handleChatbotSearch(searchText)}
+          handleClearFilters={() =>
             handleClearFilters(
               setActiveTypeFilter,
               setSelectedAgency,
@@ -226,139 +221,80 @@ export const DocumentList: React.FC<DocumentListProps> = ({ isSidebarOpen }) => 
               setSearchApplied,
               setFilters,
               setCurrent,
-              initialFilterState
+              setIsOpenComments,
+              setIsPopular
             )
           }
-          key="clear-filter-tag"
-        >
-          Clear Filters
-        </Tag>
-  
-        {selectedAgency && (
-          <Tag
-            onClick={() =>
-              handleAgencyFilterChange("", setSelectedAgency, setFilters, setCurrent, searchText)
-            }
-            key="selected-agency-tag"
-          >
-            Agency: {selectedAgency}
-          </Tag>
-        )}
-        {searchApplied && (
-          <Tag
-            onClick={() => handleSearch("", setSearchText, setSearchApplied, setFilters, setCurrent)}
-            key="search-text-tag"
-          >
-            Search: {searchText}
-          </Tag>
-        )}
-        {filters.some((filter) => filter.field === 'document_number') && (
-          <Tag
-            closable
-            onClose={() => handleRemoveDocumentFilter(setDocumentNumbers, setFilters, setCurrent)}
-          >
-            Document Filter
-          </Tag>
-        )}
-      </div>
-  
-      <div style={{ marginBottom: 20 }}>
-        Total Documents: {totalDocuments}
-      </div>
-  
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-        <Input
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 200, marginRight: 8 }}
-        />
-        <Button
-          onClick={() =>
-            handleSearch(searchText, setSearchText, setSearchApplied, setFilters, setCurrent)
+          isOpenComments={isOpenComments}
+          setIsOpenComments={setIsOpenComments}
+          isPopular={isPopular}
+          setIsPopular={setIsPopular}
+          activeTypeFilter={activeTypeFilter}
+          setActiveTypeFilter={(type) =>
+            handleTypeFilterChange(
+              type,
+              setActiveTypeFilter,
+              setFilters,
+              setCurrent,
+              searchText,
+              selectedAgency,
+              isOpenComments,
+              isPopular
+            )
           }
-        >
-          Filter Docs
-        </Button>
-        <Button
-          onClick={() => handleChatbotSearch(searchText)}
-          style={{ marginLeft: 8 }}
-        >
-          Ask Chatbot
-        </Button>
-        {isChatbotInitialized && (
-          <Button
-            onClick={() => setIsChatbotSidebarOpen(!isChatbotSidebarOpen)}
-            style={{ marginLeft: 8 }}
-          >
-            {isChatbotSidebarOpen ? 'Close Chatbot' : 'Open Chatbot'}
-          </Button>
-        )}
-      </div>
-  
-      <div style={{ display: 'flex' }}>
-        <div style={{ flex: 1, overflowX: 'auto' }}>
-          <Table<IDocument>
-            {...tableProps}
-            dataSource={dataSource}
-            rowKey="document_number"
-            columns={columns as any}
-            onRow={(record) => ({
-              onClick: () => expandRow(record.document_number),
-            })}
-            expandable={{
-              expandedRowRender: (record) => <ExpandedRowContent record={record} />,
-              expandedRowKeys,
-              expandIcon: () => null,
-              columnWidth: '0px',
-            }}
-            bordered
-            className="custom-table"
-            scroll={{ x: isSidebarOpen ? 1500 : 1500, y: 'calc(100vh - 250px)' }}
-            pagination={paginationConfig}
-          />
-        </div>
-  
-        {isChatbotSidebarOpen && (
-        <div
-          style={{
-            width: 400,
-            marginLeft: 20,
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#fff',
-            zIndex: 1000,
-            boxShadow: '-2px 0 10px rgba(0, 0, 0, 0.1)',
-            transition: 'transform 0.3s ease-in-out',
-            transform: isChatbotSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
-            overflowY: 'auto',
-          }}
-          onMouseEnter={() => {
-            document.body.style.overflow = 'hidden';
-          }}
-          onMouseLeave={() => {
-            document.body.style.overflow = 'auto';
-          }}
-        >
-          {isChatbotLoading ? (
-            <div style={{ padding: 20 }}>
-              <p>Loading...</p>
+          setFilters={setFilters}
+          setCurrent={setCurrent}
+          totalDocuments={totalDocuments}
+          setSearchApplied={setSearchApplied}
+          handleAgencyFilterChange={() =>
+            handleAgencyFilterChange(
+              '',
+              setSelectedAgency,
+              setFilters,
+              setCurrent,
+              searchText,
+              activeTypeFilter,
+              isOpenComments,
+              isPopular
+            )
+          }
+          handleRemoveDocumentFilter={() => handleRemoveDocumentFilter(setFilters, setCurrent)}
+          filters={filters}
+        />
+      )}
+
+
+      {selectedTab === '1' ? (
+            <div style={{ display: 'flex' }}>
+              <div style={{ flex: 1, overflowX: 'auto' }}>
+                <Table<IDocument>
+                  {...tableProps}
+                  dataSource={dataSource}
+                  rowKey="document_number"
+                  columns={columns as any}
+                  onRow={(record) => ({
+                    onClick: () => expandRow(record.document_number),
+                  })}
+                  expandable={{
+                    expandedRowRender: (record) => <ExpandedRowContent record={record} />,
+                    expandedRowKeys,
+                    expandIcon: () => null,
+                    columnWidth: '0px',
+                  }}
+                  bordered
+                  className="custom-table"
+                  scroll={{ x: isSidebarOpen ? 1500 : 1500, y: 'calc(100vh - 250px)' }}
+                  pagination={paginationConfig}
+                />
+              </div>
             </div>
           ) : (
-            <ChatbotResults
-              searchResults={searchResults}
-              llmResponse={llmResponse}
-              onClose={() => setIsChatbotSidebarOpen(false)}
-              documentCount={searchResults.length}
-            />
+            <div style={{ padding: 20 }}>
+              <p>Coming soon</p>
+            </div>
           )}
         </div>
-      )}
-    </div>
-  </div>
-);
+      );
 };
 
 export default DocumentList;

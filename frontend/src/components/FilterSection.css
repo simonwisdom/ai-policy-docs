@@ -1,0 +1,97 @@
+.filter-section-container {
+    padding: 12px;
+    background-color: #f5f7f9; /* Light Gray */
+    border-radius: 6px;
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ant-input {
+    width: 280px;
+    height: 36px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #d9d9d9;
+}
+
+.ant-select {
+    width: 180px;
+    height: 36px;
+}
+
+.dropdown-custom-width {
+    width: 180px;
+}
+
+.filter-button {
+    height: 36px;
+    font-size: 14px;
+    background-color: #3a2a7e; /* Softer Dark Purple */
+    color: #ffffff;
+    border: none;
+    border-radius: 16px;
+    transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+    background-color: #2a1a5e; /* Darker Purple */
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.ant-switch {
+    margin-right: 6px;
+}
+
+.total-documents {
+    font-size: 14px;
+    color: #666;
+}
+
+.document-description {
+    padding-left: 12px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #666;
+}
+
+.filter-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.filter-summary .ant-tag {
+    font-size: 13px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background-color: #e6e6e6;
+    color: #333;
+}

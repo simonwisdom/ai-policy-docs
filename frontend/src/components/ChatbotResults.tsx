@@ -17,7 +17,7 @@ interface ChatbotResultsProps {
 const ChatbotResults: React.FC<ChatbotResultsProps> = ({
   searchResults,
   llmResponse,
-  onClose,
+  // onClose,
   documentCount,
 }) => {
   const [showDocuments, setShowDocuments] = useState(false);
@@ -36,8 +36,6 @@ const ChatbotResults: React.FC<ChatbotResultsProps> = ({
           marginBottom: 20,
         }}
       >
-        <h3>Chatbot Results</h3>
-        <button onClick={onClose}>Close</button>
       </div>
       <ReactMarkdown>{llmResponse}</ReactMarkdown>
 

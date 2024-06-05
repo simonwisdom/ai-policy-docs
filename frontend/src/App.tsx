@@ -1,5 +1,5 @@
+import React, { useState } from 'react';
 import { Refine } from "@refinedev/core";
-import React from 'react';
 import {
   useNotificationProvider,
   ThemedLayoutV2,
@@ -19,24 +19,29 @@ import { DocumentList } from "./pages/documents";
 import { About } from "./pages/About";
 import { Charts } from "./pages/Charts";
 import { Link } from 'react-router-dom';
-import './styles.css';
+import './App.css';
+import { StateProvider } from './components/StateContext';
+import HelpSidebar from './components/HelpSidebar';
+import SearchAssistant from './components/SearchAssistant';
 
 const { Content } = Layout;
 
-const CustomLayout: React.FC = () => (
+const CustomLayout: React.FC<{ toggleHelpSidebar: () => void; toggleChatbotSidebar: () => void }> = ({ toggleHelpSidebar, toggleChatbotSidebar }) => (
   <Layout style={{ minHeight: "100vh" }}>
     <Layout.Header className="custom-header">
       <nav>
+        <div className="header-title">AI Policy Docs</div>
         <ul>
           <li>
-            <Link to="/">Home</Link>
-          </li>
-          {/* <li>
-            <Link to="/about">About</Link>
+            <Button type="link" onClick={toggleHelpSidebar} className="nav-link">
+              About
+            </Button>
           </li>
           <li>
-            <Link to="/charts">Charts</Link>
-          </li> */}
+            <Button type="link" onClick={toggleChatbotSidebar} className="nav-link">
+              Search Assistant
+            </Button>
+          </li>
         </ul>
       </nav>
     </Layout.Header>
@@ -54,37 +59,68 @@ const API_URL =
     : `${import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3001"}/api`;
 
 const App: React.FC = () => {
+  const [isHelpSidebarOpen, setIsHelpSidebarOpen] = useState(false);
+  const [isChatbotSidebarOpen, setIsChatbotSidebarOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [llmResponse, setLLMResponse] = useState('');
+
+  const handleSearchResults = (results: any[], response: string) => {
+    setSearchResults(results);
+    setLLMResponse(response);
+  };
+
+  const toggleHelpSidebar = () => {
+    setIsHelpSidebarOpen(!isHelpSidebarOpen);
+  };
+
+  const toggleChatbotSidebar = () => {
+    console.log('Toggling search assistant sidebar');
+    setIsChatbotSidebarOpen(!isChatbotSidebarOpen);
+  };
+
   return (
     <BrowserRouter>
       <ConfigProvider theme={RefineThemes.Blue}>
         <AntdApp>
-          <Refine
-            dataProvider={dataProvider(API_URL)}
-            routerProvider={routerProvider}
-            resources={[
-              {
-                name: "ai_documents",
-                list: "/",
-                show: "/:id",
-              },
-            ]}
-            notificationProvider={useNotificationProvider}
-            options={{
-              syncWithLocation: true,
-              warnWhenUnsavedChanges: true,
-            }}
-          >
-            <Routes>
-              <Route element={<CustomLayout />}>
-                <Route index element={<DocumentList />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/charts" element={<Charts />} />
-                <Route path="*" element={<ErrorComponent />} />
-              </Route>
-            </Routes>
-            <UnsavedChangesNotifier />
-            <DocumentTitleHandler />
-          </Refine>
+          <StateProvider>
+            <Refine
+              dataProvider={dataProvider(API_URL)}
+              routerProvider={routerProvider}
+              resources={[
+                {
+                  name: "ai_documents",
+                  list: "/",
+                  show: "/:id",
+                },
+              ]}
+              notificationProvider={useNotificationProvider}
+              options={{
+                syncWithLocation: true,
+                warnWhenUnsavedChanges: true,
+              }}
+            >
+              <Routes>
+                <Route element={<CustomLayout toggleHelpSidebar={toggleHelpSidebar} toggleChatbotSidebar={toggleChatbotSidebar} />}>
+                  <Route index element={<DocumentList isHelpSidebarOpen={isHelpSidebarOpen} />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/charts" element={<Charts />} />
+                  <Route path="*" element={<ErrorComponent />} />
+                </Route>
+              </Routes>
+              <UnsavedChangesNotifier />
+              <DocumentTitleHandler />
+              {isHelpSidebarOpen && <HelpSidebar onClose={toggleHelpSidebar} />}
+              {isChatbotSidebarOpen && (
+                <SearchAssistant
+                  isOpen={isChatbotSidebarOpen}
+                  onClose={toggleChatbotSidebar}
+                  onSearchResults={handleSearchResults}
+                  searchResults={searchResults}
+                  llmResponse={llmResponse}
+                />
+              )}
+            </Refine>
+          </StateProvider>
         </AntdApp>
       </ConfigProvider>
     </BrowserRouter>

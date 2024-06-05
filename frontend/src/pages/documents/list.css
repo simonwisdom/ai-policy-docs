@@ -1,81 +1,141 @@
 /* list.css */
 
 .custom-table .ant-table {
-    font-size: 14px;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-  }
-  
-  .custom-table .ant-table-thead > tr > th {
-    background-color: #f0f2f5;
-    color: #333;
-    font-weight: bold;
-    border-bottom: none;
-    padding: 12px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-  
-  .custom-table .ant-table-tbody > tr > td {
-    background-color: #fff;
-    border-bottom: none;
-    padding: 12px 16px;
-    max-height: 60px; 
-  }
+  font-size: 14px;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  .custom-table-row.open-comments {
-    background-color: #e6f7e6;
-  }
+.custom-table .ant-table-thead > tr > th {
+  background-color: #f5f7f9; /* Light Gray */
+  color: #444;
+  font-weight: bold;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 14px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 
-  .custom-table .ant-table-tbody > tr:nth-child(odd) {
-    background-color: #f9f9f9;
-  }
-  
-  .custom-table .ant-table-tbody > tr:hover > td {
-    background-color: #f5f5f5;
-  }
-  
-  .custom-table .ant-table-cell {
-    min-width: 150px;
-    white-space: normal;
-    word-wrap: break-word;
-    padding: 12px;
-  }
-  
-  .custom-table .type-tag {
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-  
-  .custom-table .type-tag.rule {
-    background-color: #1890ff;
-    color: #fff;
-  }
-  
-  .custom-table .type-tag.proposed-rule {
-    background-color: #52c41a;
-    color: #fff;
-  }
-  
-  .custom-table .type-tag.notice {
-    background-color: #faad14;
-    color: #fff;
-  }
-  
-  .custom-table .type-tag.presidential-document {
-    background-color: #f5222d;
-    color: #fff;
-  }
+.custom-table .ant-table-tbody > tr > td {
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 14px 16px;
+  transition: background-color 0.3s;
+}
 
-  .filter-tags {
-    margin-bottom: 16px;
-  }
+.custom-table-row.open-comments {
+  background-color: #e3f2fd;
+  font-style: italic;
+}
 
-  .filter-tags .ant-tag {
-    cursor: pointer;
-    margin-right: 8px;
-    padding: 6px 12px;
-    font-size: 14px;
-  }
+.custom-table .ant-table-tbody > tr:nth-child(odd) {
+  background-color: #f5f7f9; /* Light Gray */
+}
+
+.custom-table .ant-table-tbody > tr:hover > td {
+  background-color: #e0f7fa;
+}
+
+.custom-table .ant-table-cell {
+  min-width: 140px;
+  white-space: normal;
+  word-wrap: break-word;
+  padding: 14px;
+}
+
+.custom-table .type-tag {
+  font-weight: bold;
+  padding: 3px 7px; /* Smaller padding */
+  border-radius: 6px;
+  transition: background-color 0.3s;
+  font-size: 12px; /* Smaller font size */
+}
+
+.custom-table .type-tag.rule {
+  background-color: rgba(58, 42, 126, 0.6);
+  color: #fff;
+}
+
+.custom-table .type-tag.proposed-rule {
+  background-color: rgba(52, 168, 83, 0.6);
+  color: #fff;
+}
+
+.custom-table .type-tag.notice {
+  background-color: rgba(251, 188, 5, 0.6); 
+  color: #fff;
+}
+
+.custom-table .type-tag.presidential-document {
+  background-color: rgba(234, 67, 53, 0.6); 
+  color: #fff;
+}
+
+
+.filter-tags {
+  margin-bottom: 16px;
+}
+
+.filter-tags .ant-tag {
+  cursor: pointer;
+  margin-right: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s;
+  border-radius: 6px;
+}
+
+.filter-tags .ant-tag:hover {
+  background-color: #e0e0e0;
+}
+
+/* Tabs */
+.ant-tabs-nav .ant-tabs-tab {
+  padding: 10px 16px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.3s, color 0.3s;
+  background-color: #f0f0f0; /* Light Gray for tabs */
+  border-radius: 6px 6px 0 0; /* Rounded top corners */
+  margin-right: 0; /* Remove space between tabs */
+}
+
+.ant-tabs-nav .ant-tabs-tab + .ant-tabs-tab {
+  margin-left: 0; /* Ensure no margin between adjacent tabs */
+}
+
+.ant-tabs-nav .ant-tabs-tab:hover .ant-tabs-tab-btn {
+  color: #9370DB; /* Light Purple */
+  background-color: #e0e0e0; /* Darker gray on hover */
+}
+
+.ant-tabs-nav .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #9370DB; /* Light Purple */
+}
+
+/* Ink Bar */
+.ant-tabs-ink-bar {
+  background-color: #9370DB !important; /* Light Purple for the bottom border */
+}
+
+/* Comment Button */
+.custom-table .flat-button-container {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: rgba(0, 123, 255, 0.6); /* Blue background with 0.6 opacity */
+  color: #fff; /* White text */
+  border-radius: 6px; /* Rounded corners */
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center; /* Center text */
+  transition: background-color 0.3s;
+}
+
+.custom-table .flat-button-container:hover {
+  background-color: rgba(0, 123, 255, 0.8); /* Slightly darker blue on hover */
+}

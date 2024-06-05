@@ -20,22 +20,39 @@ export const getColumns = (
     dataIndex: 'page_views_count',
     key: 'expand_and_icon',
     width: 50,
-    render: (pageViewsCount: number, record: IDocument) => (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {pageViewsCount >= 3000 && (
-          <Tooltip title={`This document has received a lot of attention! It has ${new Intl.NumberFormat().format(pageViewsCount)} page views.`} placement="right">
-            <span role="img" aria-label="Popular" style={{ marginRight: '10px' }}>
-              {pageViewsCount >= 30000 ? '🔥🔥' : '🔥'}
-            </span>
-          </Tooltip>
-        )}
-        {expandedRowKeys.includes(record.document_number) ? (
-          <span onClick={() => expandRow(record.document_number)} style={{ cursor: 'pointer' }}>-</span>
-        ) : (
-          <span onClick={() => expandRow(record.document_number)} style={{ cursor: 'pointer' }}>+</span>
-        )}
-      </div>
-    ),
+    render: (pageViewsCount: number, record: IDocument) => {
+      const currentDate = new Date();
+      const commentsCloseOn = new Date(record.comments_close_on);
+      const isOpenForComment = commentsCloseOn > currentDate;
+
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {pageViewsCount >= 3000 && (
+            <Tooltip title={`This document has received a lot of attention! It has ${new Intl.NumberFormat().format(pageViewsCount)} page views.`} placement="right">
+              <span role="img" aria-label="Popular" style={{ marginRight: '10px' }}>
+                {pageViewsCount >= 30000 ? '🔥🔥' : '🔥'}
+              </span>
+            </Tooltip>
+          )}
+          {isOpenForComment && (
+            <Tooltip title="This document is open for public comments." placement="right">
+              <span role="img" aria-label="Comment" style={{ marginRight: '10px' }}>
+                💬
+              </span>
+            </Tooltip>
+          )}
+          <span
+            onClick={(e) => {
+              e.stopPropagation(); // Ensure the row click does not interfere
+              expandRow(record.document_number);
+            }}
+            style={{ cursor: 'pointer' }}
+          >
+            {expandedRowKeys.includes(record.document_number) ? '▼' : '▶'}
+          </span>
+        </div>
+      );
+    },
   },
   {
     title: 'Type',
@@ -106,39 +123,16 @@ export const getColumns = (
       new Date(a.publication_date).getTime() - new Date(b.publication_date).getTime(),
     render: (date: string | Date) => format(new Date(date), 'MMMM d, yyyy'), // Example: May 6, 2024
   },
-  // {
-  //   title: 'Tags',
-  //   width: 100,
-  //   dataIndex: 'tags',
-  //   key: 'tags',
-  //   render: (tags: string[] | undefined, record: IDocument) => (
-  //     <div>
-  //       {Array.isArray(tags) && tags.map((tag, index) => (
-  //         <Tag
-  //           key={`${tag}-${index}`}
-  //           onClick={(event) => {
-  //             event.stopPropagation();
-  //             handleTagFilterChange(tag, setSelectedTag, setFilters, setCurrent);
-  //           }}
-  //           style={{
-  //             cursor: 'pointer',
-  //             marginBottom: '4px',
-  //             maxWidth: '250px',
-  //             overflow: 'hidden',
-  //             textOverflow: 'ellipsis',
-  //             whiteSpace: 'normal',
-  //             height: 'auto',
-  //             display: 'inline-block',
-  //             lineHeight: 'normal',
-  //             padding: '4px'
-  //           }}
-  //         >
-  //           {tag}
-  //         </Tag>
-  //       ))}
-  //     </div>
-  //   ),
-  // },
+  {
+    title: 'Page Views',
+    dataIndex: 'page_views_count',
+    key: 'page_views',
+    width: 150,
+    render: (pageViewsCount: number) => {
+      const roundedPageViews = Math.round(pageViewsCount / 1000) * 1000;
+      return `${new Intl.NumberFormat().format(roundedPageViews)}`;
+    },
+  },
   {
     title: 'LLM Summary',
     dataIndex: 'llm_summary',
@@ -161,37 +155,41 @@ export const getColumns = (
     },
   },
   {
-    title: 'Comments Close On',
+    title: 'Public Comment',
     dataIndex: 'comments_close_on',
     key: 'comments_close_on',
     render: (text: string, record: IDocument) => {
       if (!text) {
         return <div style={{ minHeight: '24px' }}>—</div>;
       }
-
+  
       const currentDate = new Date();
       const commentsCloseOn = new Date(text);
-
+  
       if (isNaN(commentsCloseOn.getTime())) {
         console.error("Invalid date:", text);
         return <div>Invalid closing date</div>;
       }
-
+  
       const shouldShowCommentButton = commentsCloseOn > currentDate;
       const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy');
-
+  
       return (
         <div>
-          {formattedDate}
           {shouldShowCommentButton && (
-            <div style={{ marginTop: '4px' }}>
-              <FlatButton onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}>
-                Submit Comment!
-              </FlatButton>
+            <div style={{ marginTop: '4px', textAlign: 'center' }}>
+              <div
+                className="flat-button-container"
+                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+              >
+                Submit by <b>{formattedDate}</b>
+              </div>
             </div>
           )}
         </div>
       );
     },
-  },
+  }
+  
+  
 ];

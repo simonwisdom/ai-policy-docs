@@ -159,11 +159,14 @@ function constructQuery(filters, documentFilter) {
     if (type === "Popular") {
       conditions.push("page_views_count >= $" + (query.values.length + 1));
       query.values.push(3000);
-    } else if (type === "Open Comments") {
-      conditions.push("CAST(comments_close_on AS DATE) > CURRENT_DATE");
     } else if (type) {
       conditions.push("type = $" + (query.values.length + 1));
       query.values.push(type);
+    }
+
+    if (filters.comments_close_on) {
+      conditions.push("CAST(comments_close_on AS DATE) > $" + (query.values.length + 1));
+      query.values.push(filters.comments_close_on);
     }
 
     if (tags) {

@@ -8,7 +8,7 @@ from federal_register.client import FederalRegister
 from multiprocessing import Pool
 from tqdm import tqdm
 import requests
-from time import sleep
+from time to sleep
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = os.environ['DATABASE_URL']
 FR_DOCUMENTS_TABLE_NAME = os.environ['FR_DOCUMENTS_TABLE_NAME']
 AI_DOCUMENTS_TABLE_NAME = os.environ['AI_DOCUMENTS_TABLE_NAME']
-UPDATE_THRESHOLD = timedelta(days=3)  # Only update documents modified more than 3 days ago
 
 # Initialize the Federal Register client
 federal_register_client = FederalRegister()
@@ -59,19 +58,16 @@ def fetch_page_views(document_number):
 
 def update_page_views(args):
     document_number, previous_page_views_count, page_views_count_modified_at, table_name = args
-    current_time = datetime.now()
-
-    if page_views_count_modified_at is None or current_time - page_views_count_modified_at > UPDATE_THRESHOLD:
-        page_views_count = fetch_page_views(document_number)
+    page_views_count = fetch_page_views(document_number)
         
-        if page_views_count is not None:
-            with psycopg2.connect(DATABASE_URL) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(f"UPDATE {table_name} SET page_views_count = %s, page_views_count_modified_at = NOW() WHERE document_number = %s",
-                                (page_views_count, document_number))
-                    conn.commit()
-                    return 1
-    
+    if page_views_count is not None:
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(f"UPDATE {table_name} SET page_views_count = %s, page_views_count_modified_at = NOW() WHERE document_number = %s",
+                            (page_views_count, document_number))
+                conn.commit()
+                return 1
+
     return 0
 
 def update_page_views_in_postgres(table_name):
