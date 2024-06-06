@@ -7,11 +7,13 @@ const morgan = require("morgan");
 const winston = require("winston");
 const path = require('path');
 require("dotenv").config();
-const mailgun = require('mailgun-js');
+const FormData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(FormData);
 
-const mg = mailgun({
-  apiKey: process.env.MAILGUN_API_KEY,
-  domain: process.env.MAILGUN_DOMAIN,
+const mg = mailgun.client({
+  username: 'api',
+  key: process.env.MAILGUN_API_KEY || 'your-mailgun-api-key',
 });
 
 const algoliaSearchRouter = require('./algoliaSearch');
@@ -238,18 +240,18 @@ app.post('/api/contact', (req, res) => {
   const data = {
     from: `${name} <${email}>`,
     to: process.env.CONTACT_EMAIL,
-    subject: 'New Feedback from AIPolicyDocs.org',
+    subject: 'Feedback from AIPolicyDocs.org',
     text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
   };
 
-  mg.messages().send(data, (error, body) => {
-    if (error) {
+  mg.messages.create(process.env.MAILGUN_DOMAIN, data)
+    .then((response) => {
+      res.status(200).json({ message: 'Email sent successfully' });
+    })
+    .catch((error) => {
       console.error('Error sending email:', error);
       res.status(500).json({ message: 'Error sending email' });
-    } else {
-      res.status(200).json({ message: 'Email sent successfully' });
-  }
-});
+    });
 });
 
 
