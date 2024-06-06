@@ -35,8 +35,6 @@ const DocumentList: React.FC<DocumentListProps & { isHelpSidebarOpen: boolean }>
   const [documentNumbers, setDocumentNumbers] = useState<number[]>([]);
   const [selectedTab, setSelectedTab] = useState('1');
 
-
-
   const handleTabChange = (key) => {
     console.log('Selected tab:', key);
     setSelectedTab(key);

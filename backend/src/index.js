@@ -7,6 +7,12 @@ const morgan = require("morgan");
 const winston = require("winston");
 const path = require('path');
 require("dotenv").config();
+const mailgun = require('mailgun-js');
+
+const mg = mailgun({
+  apiKey: process.env.MAILGUN_API_KEY,
+  domain: process.env.MAILGUN_DOMAIN,
+});
 
 const algoliaSearchRouter = require('./algoliaSearch');
 
@@ -224,6 +230,26 @@ app.get("/api/ai_documents", async (req, res) => {
     logger.error(err.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+app.post('/api/contact', (req, res) => {
+  const { name, email, message } = req.body;
+
+  const data = {
+    from: `${name} <${email}>`,
+    to: process.env.CONTACT_EMAIL,
+    subject: 'New Feedback from AIPolicyDocs.org',
+    text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+  };
+
+  mg.messages().send(data, (error, body) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      res.status(500).json({ message: 'Error sending email' });
+    } else {
+      res.status(200).json({ message: 'Email sent successfully' });
+  }
+});
 });
 
 

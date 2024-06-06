@@ -10,7 +10,7 @@ import dataProvider from "@refinedev/simple-rest";
 import routerProvider, {
   NavigateToResource,
   UnsavedChangesNotifier,
-  DocumentTitleHandler,
+  // DocumentTitleHandler,
 } from "@refinedev/react-router-v6";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ConfigProvider, App as AntdApp, Layout, Button } from "antd";
@@ -108,7 +108,7 @@ const App: React.FC = () => {
                 </Route>
               </Routes>
               <UnsavedChangesNotifier />
-              <DocumentTitleHandler />
+              {/* <DocumentTitleHandler /> */}
               {isHelpSidebarOpen && <HelpSidebar onClose={toggleHelpSidebar} />}
               {isChatbotSidebarOpen && (
                 <SearchAssistant
