@@ -149,6 +149,7 @@ def insert_to_postgres(conn, documents, existing_numbers):
                 doc.get('regulations_dot_gov_info', {}).get('document_id', ''),
                 doc.get('regulations_dot_gov_info', {}).get('title', ''),
                 doc.get('regulations_dot_gov_url', ''),
+                doc.get('regulations_dot_gov_info', {}).get('docket_comments_count', 0),
                 doc.get('significant'),
                 doc.get('subtype', ''),
                 doc.get('title', ''),
