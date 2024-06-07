@@ -129,8 +129,12 @@ export const getColumns = (
     key: 'page_views',
     width: 150,
     render: (pageViewsCount: number) => {
-      const roundedPageViews = Math.round(pageViewsCount / 1000) * 1000;
-      return `${new Intl.NumberFormat().format(roundedPageViews)}`;
+      if (pageViewsCount < 1000) {
+        return `${new Intl.NumberFormat().format(pageViewsCount)}`;
+      } else {
+        const roundedPageViews = Math.round(pageViewsCount / 1000) * 1000;
+        return `${new Intl.NumberFormat().format(roundedPageViews)}`;
+      }
     },
   },
   {
@@ -171,21 +175,23 @@ export const getColumns = (
         return <div>Invalid closing date</div>;
       }
   
-      const shouldShowCommentButton = commentsCloseOn > currentDate;
+      const isCommentPeriodOpen = commentsCloseOn > currentDate;
       const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy');
   
       return (
         <div>
-          {shouldShowCommentButton && (
-            <div style={{ marginTop: '4px', textAlign: 'center' }}>
-              <div
-                className="flat-button-container"
-                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
-              >
-                Submit by <b>{formattedDate}</b>
-              </div>
+          <div style={{ marginTop: '4px', textAlign: 'center' }}>
+            <div
+              className={`flat-button-container ${isCommentPeriodOpen ? 'open' : 'closed'}`}
+              onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+            >
+              {isCommentPeriodOpen ? (
+                <>Submit by <b>{formattedDate}</b></>
+              ) : (
+                <>Comments closed on <b>{formattedDate}</b></>
+              )}
             </div>
-          )}
+          </div>
         </div>
       );
     },

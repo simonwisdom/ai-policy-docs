@@ -127,7 +127,7 @@
 .custom-table .flat-button-container {
   display: inline-block;
   padding: 6px 12px;
-  background-color: rgba(0, 123, 255, 0.6); /* Blue background with 0.6 opacity */
+  background-color: rgba(147, 112, 219, 0.6); /* Light Purple background with 0.6 opacity */
   color: #fff; /* White text */
   border-radius: 6px; /* Rounded corners */
   font-weight: bold;
@@ -137,5 +137,15 @@
 }
 
 .custom-table .flat-button-container:hover {
-  background-color: rgba(0, 123, 255, 0.8); /* Slightly darker blue on hover */
+  background-color: rgba(147, 112, 219, 0.8); /* Slightly darker Light Purple on hover */
+}
+
+.flat-button-container.open {
+  background-color: rgba(147, 112, 219, 0.8); /* Darker Light Purple background with 0.8 opacity */
+  color: white;
+}
+
+.flat-button-container.closed {
+  background-color: rgba(234, 203, 252, 0.6); /* Lighter Purple background with 0.6 opacity */
+  color: #444; /* Dark Gray text */
 }
