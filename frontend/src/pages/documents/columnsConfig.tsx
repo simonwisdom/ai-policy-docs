@@ -174,7 +174,10 @@ export const getColumns = (
             {record.regulations_dot_gov_comments_url ? (
               <div
                 className="flat-button-container closed"
-                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(record.regulations_dot_gov_comments_url, '_blank');
+                }}
               >
                 View docket
               </div>
@@ -196,7 +199,10 @@ export const getColumns = (
             {record.regulations_dot_gov_comments_url ? (
               <div
                 className={`flat-button-container ${isCommentPeriodOpen ? 'open' : 'closed'}`}
-                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(record.regulations_dot_gov_comments_url, '_blank');
+                }}
               >
                 {isCommentPeriodOpen ? (
                   <>Submit by <b>{formattedDate}</b></>
