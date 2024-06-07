@@ -163,39 +163,79 @@ export const getColumns = (
     dataIndex: 'comments_close_on',
     key: 'comments_close_on',
     render: (text: string, record: IDocument) => {
-      if (!text) {
-        return <div style={{ minHeight: '24px' }}>—</div>;
-      }
-  
       const currentDate = new Date();
       const commentsCloseOn = new Date(text);
+      const isCommentPeriodOpen = commentsCloseOn > currentDate;
+      const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy');
+      
+      if (!text) {
+        return (
+          <div style={{ textAlign: 'center' }}>
+            {record.regulations_dot_gov_comments_url ? (
+              <div
+                className="flat-button-container closed"
+                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+              >
+                View docket
+              </div>
+            ) : (
+              <div style={{ minHeight: '24px' }}>—</div>
+            )}
+          </div>
+        );
+      }
   
       if (isNaN(commentsCloseOn.getTime())) {
         console.error("Invalid date:", text);
         return <div>Invalid closing date</div>;
       }
   
-      const isCommentPeriodOpen = commentsCloseOn > currentDate;
-      const formattedDate = format(commentsCloseOn, 'MMMM d, yyyy');
-  
       return (
         <div>
           <div style={{ marginTop: '4px', textAlign: 'center' }}>
-            <div
-              className={`flat-button-container ${isCommentPeriodOpen ? 'open' : 'closed'}`}
-              onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
-            >
-              {isCommentPeriodOpen ? (
-                <>Submit by <b>{formattedDate}</b></>
-              ) : (
-                <>Comments closed on <b>{formattedDate}</b></>
-              )}
-            </div>
+            {record.regulations_dot_gov_comments_url ? (
+              <div
+                className={`flat-button-container ${isCommentPeriodOpen ? 'open' : 'closed'}`}
+                onClick={() => window.open(record.regulations_dot_gov_comments_url, '_blank')}
+              >
+                {isCommentPeriodOpen ? (
+                  <>Submit by <b>{formattedDate}</b></>
+                ) : (
+                  <>Comments closed on <b>{formattedDate}</b></>
+                )}
+              </div>
+            ) : (
+              <div style={{ minHeight: '24px' }}>—</div>
+            )}
           </div>
         </div>
       );
     },
+  },
+  
+  {
+    title: 'Comments Count',
+    dataIndex: 'comments_count',
+    key: 'comments_count',
+    width: 150,
+    render: (commentsCount: number) => {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {commentsCount >= 100 && (
+            <Tooltip title={`This document has received ${commentsCount} comments.`} placement="right">
+              <span role="img" aria-label="Popular">
+                {commentsCount >= 1000 ? '🔥🔥' : '🔥'}
+              </span>
+            </Tooltip>
+          )}
+          <span style={{ marginLeft: '10px' }}>
+            {commentsCount === 0 ? 'N/A' : new Intl.NumberFormat().format(commentsCount)}
+          </span>
+        </div>
+      );
+    },
   }
+  
   
   
 ];
