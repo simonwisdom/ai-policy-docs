@@ -13,12 +13,14 @@
   color: #444;
   font-weight: bold;
   border-bottom: 1px solid #e0e0e0;
-  padding: 14px 16px;
+  padding: 8px 16px;
   position: sticky;
   top: 0;
   z-index: 1;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .custom-table .ant-table-tbody > tr > td {
@@ -42,7 +44,7 @@
 }
 
 .custom-table .ant-table-cell {
-  min-width: 140px;
+  /* min-width: 140px; */
   white-space: normal;
   word-wrap: break-word;
   padding: 14px;
@@ -148,4 +150,10 @@
 .flat-button-container.closed {
   background-color: rgba(234, 203, 252, 0.6); /* Lighter Purple background with 0.6 opacity */
   color: #444; /* Dark Gray text */
+}
+
+.expanded-row {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #f0f0f0;
 }

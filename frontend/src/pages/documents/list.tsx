@@ -278,10 +278,12 @@ const DocumentList: React.FC<DocumentListProps & { isHelpSidebarOpen: boolean }>
                     expandedRowKeys,
                     expandIcon: () => null,
                     columnWidth: '0px',
+                    expandIconColumnIndex: -1,
                   }}
                   bordered
                   className="custom-table"
-                  scroll={{ x: isSidebarOpen ? 1500 : 1500, y: 'calc(100vh - 250px)' }}
+                  scroll={{ x: 'max-content' }}
+                  // scroll={{ x: isSidebarOpen ? 1500 : 1500, y: 'calc(100vh - 250px)' }}
                   pagination={paginationConfig}
                 />
               </div>
