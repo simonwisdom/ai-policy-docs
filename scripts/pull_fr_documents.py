@@ -114,12 +114,14 @@ def insert_to_postgres(conn, documents, existing_numbers):
         logging.info("No new documents to insert, all duplicates.")
         return
 
-    columns = ['abstract', 'action', 'agency_names', 'html_url', 'body_html_url', 'citation', 'comment_url',
-               'comments_close_on', 'dates', 'docket_ids', 'document_number', 'effective_on', 'excerpts',
-               'full_text_xml_url', 'json_url', 'page_views_count', 'publication_date', 'raw_text_url',
-               'regulations_dot_gov_comments_url', 'regulations_dot_gov_docket_id', 'regulations_dot_gov_document_id',
-               'regulations_dot_gov_title', 'regulations_dot_gov_url', 'significant', 'subtype', 'title', 'toc_doc',
-               'toc_subject', 'topics', 'type']
+    columns = [
+        'abstract', 'action', 'agency_names', 'html_url', 'body_html_url', 'citation', 'comment_url',
+        'comments_close_on', 'dates', 'docket_ids', 'document_number', 'effective_on', 'excerpts',
+        'full_text_xml_url', 'json_url', 'page_views_count', 'publication_date', 'raw_text_url',
+        'regulations_dot_gov_comments_url', 'regulations_dot_gov_docket_id', 'regulations_dot_gov_document_id',
+        'regulations_dot_gov_title', 'regulations_dot_gov_url', 'significant', 'subtype', 'title', 'toc_doc',
+        'toc_subject', 'topics', 'type', 'comments_count'
+    ]
 
     values = []
     skipped_documents = []
@@ -141,7 +143,7 @@ def insert_to_postgres(conn, documents, existing_numbers):
                 doc.get('excerpts', ''),
                 doc.get('full_text_xml_url', ''),
                 doc.get('json_url', ''),
-                doc.get('page_views', {}).get('count'),
+                doc.get('page_views', {}).get('count', 0),
                 doc.get('publication_date', ''),
                 doc.get('raw_text_url', ''),
                 transform_regulations_url(doc.get('regulations_dot_gov_info', {}).get('document_id', ''), ', '.join(doc.get('docket_ids', []))),
@@ -149,19 +151,20 @@ def insert_to_postgres(conn, documents, existing_numbers):
                 doc.get('regulations_dot_gov_info', {}).get('document_id', ''),
                 doc.get('regulations_dot_gov_info', {}).get('title', ''),
                 doc.get('regulations_dot_gov_url', ''),
-                doc.get('regulations_dot_gov_info', {}).get('docket_comments_count', 0),
                 doc.get('significant'),
                 doc.get('subtype', ''),
                 doc.get('title', ''),
                 doc.get('toc_doc', ''),
                 doc.get('toc_subject', ''),
                 ', '.join(doc.get('topics', [])),
-                doc.get('type', '')
+                doc.get('type', ''),
+                doc.get('regulations_dot_gov_info', {}).get('docket_comments_count', 0)
             )
             values.append(value)
         except AttributeError as e:
             logging.warning(f"Skipping document {doc.get('document_number', '')} due to missing attributes: {e}")
             skipped_documents.append(doc)
+
             
     if skipped_documents:
         logging.info(f"Skipped {len(skipped_documents)} documents due to missing attributes.")
