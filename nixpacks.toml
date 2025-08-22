@@ -1,10 +1,10 @@
 [phases.setup]
-nixPkgs = ["nodejs", "python3", "postgresql"]
+nixPkgs = ["nodejs", "python311", "python311Packages.pip", "postgresql"]
 
 [phases.install]
 cmds = [
     "npm ci",
-    "pip install -r scripts/requirements.txt"
+    "pip3 install -r scripts/requirements.txt"
 ]
 
 [phases.build]
