@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies for psycopg2
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy scripts and requirements
+COPY scripts/ /app/scripts/
+
+# Install Python dependencies
+RUN pip install -r scripts/requirements.txt
+
+# Set environment to use for scripts
+ENV PYTHONUNBUFFERED=1
+
+# Default command (will be overridden by cron jobs)
+CMD ["python", "--version"]

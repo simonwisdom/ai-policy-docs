@@ -1,16 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs", "python311", "python311Packages.pip", "postgresql"]
+nixPkgs = ["nodejs"]
 
 [phases.install]
-cmds = [
-    "npm ci",
-    "pip3 install -r scripts/requirements.txt"
-]
+cmds = ["npm ci"]
 
 [phases.build]
-cmds = [
-    "npm run build"
-]
+cmds = ["npm run build"]
 
 [start]
 cmd = "npm run start"
