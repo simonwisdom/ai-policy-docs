@@ -50,7 +50,7 @@ app.use(morgan("combined", { stream: { write: (message) => logger.info(message.t
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL_PROD 
+    ? ['https://aipolicydocs.org', process.env.FRONTEND_URL_PROD]
     : [process.env.FRONTEND_URL_DEV, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
 }));
 
