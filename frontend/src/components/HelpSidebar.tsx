@@ -12,7 +12,7 @@ const HelpSidebar: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         e.preventDefault();
       
         const backendUrl = import.meta.env.MODE === 'production'
-          ? `${import.meta.env.VITE_BACKEND_URL_PROD || 'https://aipolicydocs-2612a9348c68.herokuapp.com'}/api/contact`
+          ? `${import.meta.env.VITE_BACKEND_URL_PROD || 'https://ai-policy-docs-production.up.railway.app'}/api/contact`
           : `${import.meta.env.VITE_BACKEND_URL_DEV || 'http://localhost:3001'}/api/contact`;
       
         try {

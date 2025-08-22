@@ -49,7 +49,9 @@ app.use(express.static(path.join(__dirname, '../../frontend/dist')));
 app.use(morgan("combined", { stream: { write: (message) => logger.info(message.trim()) } }));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV,
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL_PROD 
+    : [process.env.FRONTEND_URL_DEV, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
 }));
 
 app.use(express.json());

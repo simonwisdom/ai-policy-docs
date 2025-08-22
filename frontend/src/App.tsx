@@ -55,7 +55,7 @@ const CustomLayout: React.FC<{ toggleHelpSidebar: () => void; toggleChatbotSideb
 
 const API_URL =
   import.meta.env.MODE === "production"
-    ? `${import.meta.env.VITE_BACKEND_URL_PROD || "https://aipolicydocs-2612a9348c68.herokuapp.com"}/api`
+    ? `${import.meta.env.VITE_BACKEND_URL_PROD || "https://ai-policy-docs-production.up.railway.app"}/api`
     : `${import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3001"}/api`;
 
 const App: React.FC = () => {

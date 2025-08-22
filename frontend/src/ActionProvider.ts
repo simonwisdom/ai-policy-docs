@@ -26,7 +26,7 @@ class ActionProvider {
 
     try {
       const backendUrl = import.meta.env.MODE === 'production'
-        ? `${import.meta.env.VITE_BACKEND_URL_PROD || 'https://aipolicydocs-2612a9348c68.herokuapp.com'}/api/algolia_search?query=${encodeURIComponent(message)}`
+        ? `${import.meta.env.VITE_BACKEND_URL_PROD || 'https://ai-policy-docs-production.up.railway.app'}/api/algolia_search?query=${encodeURIComponent(message)}`
         : `${import.meta.env.VITE_BACKEND_URL_DEV || 'http://localhost:3001'}/api/algolia_search?query=${encodeURIComponent(message)}`;
 
       console.log(`Sending request to: ${backendUrl}`);

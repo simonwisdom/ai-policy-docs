@@ -1,0 +1,14 @@
+[providers]
+node = "20"
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmd = "npm ci && npm ci --prefix backend && npm ci --prefix frontend"
+
+[phases.build]
+cmd = "npm run build --prefix frontend"
+
+[start]
+cmd = "npm run start"
